@@ -54,12 +54,13 @@ This system allows:
 ```
 indian_law_penal_code_dashrat_rajpurohit/
 ├── backend/          # Express + Node.js APIs
-│   ├── config/       # Database connection
-│   ├── controllers/  # Route logic
-│   ├── middlewares/  # Auth, rate limiting, error handlers
-│   ├── models/       # Mongoose schemas
-│   ├── routes/       # Express routes
-│   └── scripts/      # Database seeding scripts
+│   └── src/
+│       ├── config/       # Database connection
+│       ├── controllers/  # Route logic
+│       ├── middlewares/  # Auth, rate limiting, error handlers
+│       ├── models/       # Mongoose schemas
+│       ├── routes/       # Express routes
+│       └── scripts/      # Database seeding scripts
 └── frontend/         # React + Vite application
     ├── src/
     │   ├── components/ # UI components (Sidebar, Navbar, etc.)
