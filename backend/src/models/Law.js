@@ -20,7 +20,7 @@ const lawSchema = new mongoose.Schema({
     type: String,
     required: [true, 'Act name is required'],
     index: true,
-    enum: ['IPC', 'CrPC', 'Evidence Act', 'Constitution', 'Other']
+    enum: ['IPC', 'CrPC', 'CPC', 'HMA', 'IDA', 'IEA', 'MVA', 'NIA', 'Evidence Act', 'Constitution', 'Other']
   },
   chapter: {
     type: String,
