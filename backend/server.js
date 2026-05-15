@@ -2,6 +2,8 @@ require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
 const connectDB = require('./src/config/db');
+const lawRoutes = require('./src/routes/lawRoutes');
+const { notFound, errorHandler } = require('./src/middlewares/errorHandler');
 
 // Connect to database
 connectDB();
@@ -16,6 +18,10 @@ app.use(express.json());
 app.get('/', (req, res) => {
   res.send('Indian Law Penal Code API is running...');
 });
+
+app.use('/api/v1/laws', lawRoutes);
+app.use(notFound);
+app.use(errorHandler);
 
 const PORT = process.env.PORT || 5000;
 
