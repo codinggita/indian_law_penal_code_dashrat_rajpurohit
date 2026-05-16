@@ -1,9 +1,23 @@
 const assert = require('assert');
+const jwt = require('jsonwebtoken');
 
 const BASE_URL = process.env.API_BASE_URL || 'http://127.0.0.1:5000';
 
 async function request(path) {
   const response = await fetch(`${BASE_URL}${path}`);
+  const body = await response.json();
+  return { status: response.status, body };
+}
+
+async function requestWithMethod(path, method, token, payload) {
+  const response = await fetch(`${BASE_URL}${path}`, {
+    method,
+    headers: {
+      'Content-Type': 'application/json',
+      ...(token ? { Authorization: `Bearer ${token}` } : {})
+    },
+    body: payload ? JSON.stringify(payload) : undefined
+  });
   const body = await response.json();
   return { status: response.status, body };
 }
@@ -30,6 +44,25 @@ async function run() {
 
   const invalidBooleanRes = await request('/api/v1/laws?bailable=yes');
   assert.strictEqual(invalidBooleanRes.status, 400, 'Invalid boolean query should return 400');
+
+  const createPayload = {
+    sectionNumber: 'T-101',
+    title: 'Test Law',
+    description: 'Test description',
+    actName: 'IPC',
+    category: 'Criminal Law'
+  };
+
+  const noTokenRes = await requestWithMethod('/api/v1/laws', 'POST', null, createPayload);
+  assert.strictEqual(noTokenRes.status, 401, 'Missing token should return 401');
+
+  const invalidTokenRes = await requestWithMethod('/api/v1/laws', 'POST', 'invalid.jwt.token', createPayload);
+  assert.strictEqual(invalidTokenRes.status, 401, 'Invalid token should return 401');
+
+  const secret = process.env.JWT_SECRET || 'test-secret';
+  const userToken = jwt.sign({ id: 'test-user-id', role: 'user' }, secret, { expiresIn: '1h' });
+  const forbiddenRes = await requestWithMethod('/api/v1/laws', 'POST', userToken, createPayload);
+  assert.strictEqual(forbiddenRes.status, 403, 'Non-admin token should return 403');
 
   console.log('API tests passed.');
 }

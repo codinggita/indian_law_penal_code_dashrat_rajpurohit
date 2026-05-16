@@ -23,6 +23,7 @@ This file is a **mandatory** persistent record for all AI assistants working on 
 | `feat/backend-init` | Pushed | `package.json`, `server.js`, `src/config/db.js`, `.env`, `.gitignore` | Core backend setup, dependencies, and DB connection. |
 | `feat/schema-design` | Pushed | `src/models/Law.js`, `src/models/User.js` | Defined Mongoose schemas with validations and indexing. |
 | `feat/law-api-hardening-tests` | Pushed | `backend/src/controllers/lawController.js`, `backend/src/scripts/api.test.js`, `backend/package.json`, `AI_WORK_LOG.md` | Hardened law query API and added baseline API tests. |
+| `feat/law-write-routes-authz` | Pushed | `backend/src/middlewares/authMiddleware.js`, `backend/src/routes/lawRoutes.js`, `AI_WORK_LOG.md` | Protected law write routes with JWT auth and admin authorization. |
 
 ## Session Log & Discussions
 
@@ -55,9 +56,14 @@ This file is a **mandatory** persistent record for all AI assistants working on 
 - **Action:** Added JWT auth middleware and admin role authorization for law write endpoints (`POST`, `PATCH`, `DELETE`), and updated AI project rules/session memory.
 - **Files:** `backend/src/middlewares/authMiddleware.js`, `backend/src/routes/lawRoutes.js`, `AI_WORK_LOG.md`.
 
+### Session 7: Auth Guard Test Coverage
+- **Discussion:** User requested next PR after write-route auth completion.
+- **Action:** Extended API smoke tests to validate protected write-route auth responses (`401` missing token, `401` invalid token, `403` non-admin token) and updated work log history.
+- **Files:** `backend/src/scripts/api.test.js`, `AI_WORK_LOG.md`.
+
 ## Next Steps
 1. Add login/register endpoints to issue JWT with `role` claim for middleware compatibility.
-2. Add dedicated auth tests for 401/403 behavior on protected law write routes.
+2. Add admin-seeded test token generation flow for stable protected-route integration testing.
 3. Add API test execution to CI and keep each PR within 3 changed files.
 
 ---
