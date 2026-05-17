@@ -18,18 +18,15 @@ exports.register = async (req, res, next) => {
       return res.status(400).json({ success: false, message: 'Name, email, and password are required.' });
     }
 
-    const normalizedEmail = email.toLowerCase().trim();
-    const existingUser = await User.findOne({ email: normalizedEmail });
-
+    const existingUser = await User.findOne({ email: email.toLowerCase().trim() });
     if (existingUser) {
       return res.status(409).json({ success: false, message: 'User already exists.' });
     }
 
     const hashedPassword = await bcrypt.hash(password, 10);
-
     const user = await User.create({
       name: name.trim(),
-      email: normalizedEmail,
+      email: email.toLowerCase().trim(),
       password: hashedPassword
     });
 
@@ -61,9 +58,7 @@ exports.login = async (req, res, next) => {
       return res.status(400).json({ success: false, message: 'Email and password are required.' });
     }
 
-    const normalizedEmail = email.toLowerCase().trim();
-    const user = await User.findOne({ email: normalizedEmail });
-
+    const user = await User.findOne({ email: email.toLowerCase().trim() });
     if (!user) {
       return res.status(401).json({ success: false, message: 'Invalid credentials.' });
     }
