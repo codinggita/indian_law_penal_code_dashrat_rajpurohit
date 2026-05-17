@@ -18,8 +18,7 @@ exports.register = async (req, res, next) => {
       return res.status(400).json({ success: false, message: 'Name, email, and password are required.' });
     }
 
-    const normalizedEmail = email.toLowerCase().trim();
-    const existingUser = await User.findOne({ email: normalizedEmail });
+    const existingUser = await User.findOne({ email: email.toLowerCase().trim() });
     if (existingUser) {
       return res.status(409).json({ success: false, message: 'User already exists.' });
     }
@@ -27,7 +26,7 @@ exports.register = async (req, res, next) => {
     const hashedPassword = await bcrypt.hash(password, 10);
     const user = await User.create({
       name: name.trim(),
-      email: normalizedEmail,
+      email: email.toLowerCase().trim(),
       password: hashedPassword
     });
 
@@ -37,7 +36,12 @@ exports.register = async (req, res, next) => {
       success: true,
       message: 'User registered successfully.',
       data: {
-        user: { id: user._id, name: user.name, email: user.email, role: user.role },
+        user: {
+          id: user._id,
+          name: user.name,
+          email: user.email,
+          role: user.role
+        },
         token
       }
     });
@@ -73,7 +77,12 @@ exports.login = async (req, res, next) => {
       success: true,
       message: 'Login successful.',
       data: {
-        user: { id: user._id, name: user.name, email: user.email, role: user.role },
+        user: {
+          id: user._id,
+          name: user.name,
+          email: user.email,
+          role: user.role
+        },
         token
       }
     });

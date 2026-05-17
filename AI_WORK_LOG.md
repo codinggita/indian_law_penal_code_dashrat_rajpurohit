@@ -13,6 +13,7 @@ This file is a **mandatory** persistent record for all AI assistants working on 
 3. **Folder Structure:** Backend must follow the `src/` modular architecture.
 4. **Consistency:** All components must use predefined design tokens from `index.css`.
 5. **Assistant Response Style:** Do not include implemented code snippets in status updates; complete work directly, push to GitHub, open PR, and share the link with Markdown PR title/description.
+6. **PR File Limit:** Maximum 3 files changed in each PR (strict).
 
 ## Pull Request History
 
@@ -21,6 +22,8 @@ This file is a **mandatory** persistent record for all AI assistants working on 
 | `docs/project-readme` | Pushed | `README.md` | Comprehensive project documentation and roadmap setup. |
 | `feat/backend-init` | Pushed | `package.json`, `server.js`, `src/config/db.js`, `.env`, `.gitignore` | Core backend setup, dependencies, and DB connection. |
 | `feat/schema-design` | Pushed | `src/models/Law.js`, `src/models/User.js` | Defined Mongoose schemas with validations and indexing. |
+| `feat/law-api-hardening-tests` | Pushed | `backend/src/controllers/lawController.js`, `backend/src/scripts/api.test.js`, `backend/package.json`, `AI_WORK_LOG.md` | Hardened law query API and added baseline API tests. |
+| `feat/law-write-routes-authz` | Pushed | `backend/src/middlewares/authMiddleware.js`, `backend/src/routes/lawRoutes.js`, `AI_WORK_LOG.md` | Protected law write routes with JWT auth and admin authorization. |
 
 ## Session Log & Discussions
 
@@ -48,10 +51,20 @@ This file is a **mandatory** persistent record for all AI assistants working on 
 - **Action:** Hardened `GET /api/v1/laws` query handling (safe sort whitelist, strict boolean validation, bounded escaped search), added backend API smoke test script, updated npm test script, and prepared PR delivery.
 - **Files:** `backend/src/controllers/lawController.js`, `backend/src/scripts/api.test.js`, `backend/package.json`, `AI_WORK_LOG.md`.
 
+### Session 6: Law Write Route Auth + Role Guard
+- **Discussion:** User requested next PR and added strict rule: max 3 files changed per PR.
+- **Action:** Added JWT auth middleware and admin role authorization for law write endpoints (`POST`, `PATCH`, `DELETE`), and updated AI project rules/session memory.
+- **Files:** `backend/src/middlewares/authMiddleware.js`, `backend/src/routes/lawRoutes.js`, `AI_WORK_LOG.md`.
+
+### Session 7: Auth Guard Test Coverage
+- **Discussion:** User requested next PR after write-route auth completion.
+- **Action:** Extended API smoke tests to validate protected write-route auth responses (`401` missing token, `401` invalid token, `403` non-admin token) and updated work log history.
+- **Files:** `backend/src/scripts/api.test.js`, `AI_WORK_LOG.md`.
+
 ## Next Steps
-1. Merge current API hardening PR.
-2. Add route-level auth and role checks for create/update/delete law endpoints.
-3. Add API test execution to CI and extend edge-case coverage.
+1. Add login/register endpoints to issue JWT with `role` claim for middleware compatibility.
+2. Add admin-seeded test token generation flow for stable protected-route integration testing.
+3. Add API test execution to CI and keep each PR within 3 changed files.
 
 ---
 **Note to future AIs:** Update the "Pull Request History" and "Session Log" sections before finishing your turn.
