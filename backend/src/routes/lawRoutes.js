@@ -1,6 +1,7 @@
 const express = require('express');
 const {
   getAllLaws,
+  getLawStats,
   getLawById,
   createLaw,
   updateLaw,
@@ -10,6 +11,7 @@ const { protect, authorize } = require('../middlewares/authMiddleware');
 
 const router = express.Router();
 
+router.get('/stats/overview', getLawStats);
 router.route('/').get(getAllLaws).post(protect, authorize('admin'), createLaw);
 router.route('/:id').get(getLawById).patch(protect, authorize('admin'), updateLaw).delete(protect, authorize('admin'), deleteLaw);
 

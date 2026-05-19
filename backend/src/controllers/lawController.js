@@ -166,3 +166,17 @@ exports.deleteLaw = async (req, res, next) => {
     return next(error);
   }
 };
+
+exports.getLawStats = async (req, res, next) => {
+  try {
+    const stats = await lawService.getOverviewStats();
+
+    return res.status(200).json({
+      success: true,
+      message: 'Law stats fetched successfully',
+      data: stats
+    });
+  } catch (error) {
+    return next(error);
+  }
+};
