@@ -4,6 +4,7 @@ const cors = require('cors');
 const connectDB = require('./src/config/db');
 const lawRoutes = require('./src/routes/lawRoutes');
 const authRoutes = require('./src/routes/authRoutes');
+const requestLogger = require('./src/middlewares/requestLogger');
 const { notFound, errorHandler } = require('./src/middlewares/errorHandler');
 
 // Connect to database
@@ -14,6 +15,7 @@ const app = express();
 // Middlewares
 app.use(cors());
 app.use(express.json());
+app.use(requestLogger);
 
 // Basic Route
 app.get('/', (req, res) => {
