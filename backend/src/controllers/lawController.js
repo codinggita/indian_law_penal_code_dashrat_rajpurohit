@@ -1,5 +1,4 @@
 const mongoose = require('mongoose');
-const Law = require('../models/Law');
 const lawService = require('../services/lawService');
 const ALLOWED_SORT_FIELDS = new Set(['sectionNumber', 'title', 'actName', 'category', 'state', 'createdAt', 'updatedAt']);
 const MAX_SEARCH_LENGTH = 80;
@@ -71,8 +70,8 @@ exports.getAllLaws = async (req, res, next) => {
     const filters = buildFilters(req.query);
 
     const [laws, total] = await Promise.all([
-      Law.find(filters).sort(sort).skip(skip).limit(limit),
-      Law.countDocuments(filters)
+      lawService.findAll(filters, sort, skip, limit),
+      lawService.countAll(filters)
     ]);
 
     return res.status(200).json({
@@ -97,7 +96,7 @@ exports.getLawById = async (req, res, next) => {
       return res.status(400).json({ success: false, message: 'Invalid law id' });
     }
 
-    const law = await Law.findById(req.params.id);
+    const law = await lawService.findById(req.params.id);
     if (!law) {
       return res.status(404).json({ success: false, message: 'Law not found' });
     }
@@ -114,7 +113,7 @@ exports.getLawById = async (req, res, next) => {
 
 exports.createLaw = async (req, res, next) => {
   try {
-    const law = await Law.create(req.body);
+    const law = await lawService.createOne(req.body);
     return res.status(201).json({
       success: true,
       message: 'Law created successfully',
@@ -131,10 +130,7 @@ exports.updateLaw = async (req, res, next) => {
       return res.status(400).json({ success: false, message: 'Invalid law id' });
     }
 
-    const law = await Law.findByIdAndUpdate(req.params.id, req.body, {
-      new: true,
-      runValidators: true
-    });
+    const law = await lawService.updateById(req.params.id, req.body);
 
     if (!law) {
       return res.status(404).json({ success: false, message: 'Law not found' });
@@ -156,7 +152,7 @@ exports.deleteLaw = async (req, res, next) => {
       return res.status(400).json({ success: false, message: 'Invalid law id' });
     }
 
-    const law = await Law.findByIdAndDelete(req.params.id);
+    const law = await lawService.deleteById(req.params.id);
     if (!law) {
       return res.status(404).json({ success: false, message: 'Law not found' });
     }

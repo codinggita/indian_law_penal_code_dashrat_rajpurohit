@@ -1,23 +1,37 @@
 const Law = require('../models/Law');
 
-async function getOverviewStats() {
-  const [totalLaws, byAct, byCategory, byBailable, byCognizable] = await Promise.all([
-    Law.countDocuments({}),
-    Law.aggregate([
-      { $group: { _id: '$actName', count: { $sum: 1 } } },
-      { $sort: { count: -1, _id: 1 } }
-    ]),
-    Law.aggregate([
-      { $group: { _id: '$category', count: { $sum: 1 } } },
-      { $sort: { count: -1, _id: 1 } }
-    ]),
-    Law.aggregate([{ $group: { _id: '$bailable', count: { $sum: 1 } } }]),
-    Law.aggregate([{ $group: { _id: '$cognizable', count: { $sum: 1 } } }])
-  ]);
+function findAll(filters, sort, skip, limit) {
+  return Law.find(filters).sort(sort).skip(skip).limit(limit);
+}
 
-  return { totalLaws, byAct, byCategory, byBailable, byCognizable };
+function countAll(filters) {
+  return Law.countDocuments(filters);
+}
+
+function findById(id) {
+  return Law.findById(id);
+}
+
+function createOne(payload) {
+  return Law.create(payload);
+}
+
+function updateById(id, payload) {
+  return Law.findByIdAndUpdate(id, payload, {
+    new: true,
+    runValidators: true
+  });
+}
+
+function deleteById(id) {
+  return Law.findByIdAndDelete(id);
 }
 
 module.exports = {
-  getOverviewStats
+  findAll,
+  countAll,
+  findById,
+  createOne,
+  updateById,
+  deleteById
 };
