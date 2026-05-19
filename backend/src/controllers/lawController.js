@@ -1,5 +1,6 @@
 const mongoose = require('mongoose');
 const Law = require('../models/Law');
+const lawService = require('../services/lawService');
 const ALLOWED_SORT_FIELDS = new Set(['sectionNumber', 'title', 'actName', 'category', 'state', 'createdAt', 'updatedAt']);
 const MAX_SEARCH_LENGTH = 80;
 
@@ -164,6 +165,20 @@ exports.deleteLaw = async (req, res, next) => {
       success: true,
       message: 'Law deleted successfully',
       data: { id: req.params.id }
+    });
+  } catch (error) {
+    return next(error);
+  }
+};
+
+exports.getLawStats = async (req, res, next) => {
+  try {
+    const stats = await lawService.getOverviewStats();
+
+    return res.status(200).json({
+      success: true,
+      message: 'Law stats fetched successfully',
+      data: stats
     });
   } catch (error) {
     return next(error);
