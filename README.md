@@ -540,6 +540,18 @@ VITE_API_URL=http://localhost:5000/api/v1
 
 ---
 
+## 📬 Postman Testing
+
+- Import collection: `backend/postman/indian-law-penal-code.postman_collection.json`
+- Set `baseUrl` variable to `http://localhost:5000`
+- Run requests in this order:
+  1. `Auth/Register`
+  2. `Auth/Login`
+  3. `Laws/List Laws`
+  4. `Laws/Law Stats Overview`
+
+---
+
 ## ▶️ Running the Project
 
 ### Step 1 — Install Backend Dependencies
