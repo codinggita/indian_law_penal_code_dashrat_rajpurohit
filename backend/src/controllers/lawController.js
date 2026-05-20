@@ -47,6 +47,30 @@ function buildFilters(query) {
   return filters;
 }
 
+async function listByFilters(req, res, next, extraFilters = {}, defaultSort = 'sectionNumber') {
+  try {
+    const page = Math.max(parseInt(req.query.page, 10) || 1, 1);
+    const limit = Math.min(Math.max(parseInt(req.query.limit, 10) || 10, 1), 100);
+    const skip = (page - 1) * limit;
+    const sort = normalizeSort(req.query.sort || defaultSort);
+    const filters = { ...buildFilters(req.query), ...extraFilters };
+
+    const [laws, total] = await Promise.all([
+      lawService.findAll(filters, sort, skip, limit),
+      lawService.countAll(filters)
+    ]);
+
+    return res.status(200).json({
+      success: true,
+      message: 'Laws fetched successfully',
+      data: laws,
+      pagination: { page, limit, total, totalPages: Math.ceil(total / limit) }
+    });
+  } catch (error) {
+    return next(error);
+  }
+}
+
 exports.getAllLaws = async (req, res, next) => {
   try {
     const page = Math.max(parseInt(req.query.page, 10) || 1, 1);
@@ -90,6 +114,24 @@ exports.getAllLaws = async (req, res, next) => {
   }
 };
 
+exports.getRecentLaws = async (req, res, next) => listByFilters(req, res, next, {}, '-createdAt');
+exports.getTrendingLaws = async (req, res, next) => listByFilters(req, res, next, {}, '-views');
+exports.getArchivedLaws = async (req, res, next) => listByFilters(req, res, next, { isArchived: true }, '-updatedAt');
+exports.searchLaws = async (req, res, next) => {
+  req.query.search = req.query.q || req.query.search;
+  return listByFilters(req, res, next);
+};
+
+exports.filterByAct = async (req, res, next) => listByFilters(req, res, next, { actName: req.params.actName });
+exports.filterByCategory = async (req, res, next) => listByFilters(req, res, next, { category: req.params.category });
+exports.filterByState = async (req, res, next) => listByFilters(req, res, next, { state: req.params.state });
+exports.filterByCourt = async (req, res, next) => listByFilters(req, res, next, { court: req.params.courtName });
+exports.filterByStatus = async (req, res, next) => listByFilters(req, res, next, { status: req.params.status });
+exports.filterByBailable = async (req, res, next) => listByFilters(req, res, next, { bailable: req.params.value === 'true' });
+exports.filterByCognizable = async (req, res, next) => listByFilters(req, res, next, { cognizable: req.params.value === 'true' });
+exports.filterByChapter = async (req, res, next) => listByFilters(req, res, next, { chapter: req.params.chapterId });
+exports.filterBySection = async (req, res, next) => listByFilters(req, res, next, { sectionNumber: req.params.sectionNumber });
+
 exports.getLawById = async (req, res, next) => {
   try {
     if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
@@ -106,6 +148,73 @@ exports.getLawById = async (req, res, next) => {
       message: 'Law fetched successfully',
       data: law
     });
+  } catch (error) {
+    return next(error);
+  }
+};
+
+exports.getLawExistsById = async (req, res, next) => {
+  try {
+    if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
+      return res.status(400).json({ success: false, message: 'Invalid law id' });
+    }
+    const law = await lawService.findById(req.params.id);
+    return res.status(200).json({ success: true, message: 'Law existence checked', data: { exists: Boolean(law) } });
+  } catch (error) {
+    return next(error);
+  }
+};
+
+exports.getRandomLaw = async (req, res, next) => {
+  try {
+    const laws = await lawService.findAll({}, 'sectionNumber', 0, 1);
+    if (!laws.length) {
+      return res.status(404).json({ success: false, message: 'No laws found' });
+    }
+    const count = await lawService.countAll({});
+    const randomSkip = Math.floor(Math.random() * count);
+    const randomLaw = await lawService.findAll({}, 'sectionNumber', randomSkip, 1);
+    return res.status(200).json({ success: true, message: 'Random law fetched successfully', data: randomLaw[0] || laws[0] });
+  } catch (error) {
+    return next(error);
+  }
+};
+
+exports.getLawSummary = async (req, res, next) => {
+  try {
+    if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
+      return res.status(400).json({ success: false, message: 'Invalid law id' });
+    }
+    const law = await lawService.findById(req.params.id);
+    if (!law) {
+      return res.status(404).json({ success: false, message: 'Law not found' });
+    }
+    return res.status(200).json({
+      success: true,
+      message: 'Law summary fetched successfully',
+      data: {
+        id: law._id,
+        sectionNumber: law.sectionNumber,
+        title: law.title,
+        punishmentType: law.punishmentType,
+        punishmentDetails: law.punishmentDetails
+      }
+    });
+  } catch (error) {
+    return next(error);
+  }
+};
+
+exports.getLawHistory = async (req, res, next) => {
+  try {
+    if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
+      return res.status(400).json({ success: false, message: 'Invalid law id' });
+    }
+    const law = await lawService.findById(req.params.id);
+    if (!law) {
+      return res.status(404).json({ success: false, message: 'Law not found' });
+    }
+    return res.status(200).json({ success: true, message: 'Law history fetched successfully', data: law.updateHistory || [] });
   } catch (error) {
     return next(error);
   }
@@ -130,7 +239,17 @@ exports.updateLaw = async (req, res, next) => {
       return res.status(400).json({ success: false, message: 'Invalid law id' });
     }
 
-    const law = await lawService.updateById(req.params.id, req.body);
+    const payload = {
+      ...req.body,
+      $push: {
+        updateHistory: {
+          updatedAt: new Date(),
+          updatedBy: req.user?.id || 'system',
+          changes: 'Law updated'
+        }
+      }
+    };
+    const law = await lawService.updateById(req.params.id, payload);
 
     if (!law) {
       return res.status(404).json({ success: false, message: 'Law not found' });
@@ -144,6 +263,16 @@ exports.updateLaw = async (req, res, next) => {
   } catch (error) {
     return next(error);
   }
+};
+
+exports.archiveLaw = async (req, res, next) => {
+  req.body = { isArchived: true };
+  return exports.updateLaw(req, res, next);
+};
+
+exports.restoreLaw = async (req, res, next) => {
+  req.body = { isArchived: false };
+  return exports.updateLaw(req, res, next);
 };
 
 exports.deleteLaw = async (req, res, next) => {
