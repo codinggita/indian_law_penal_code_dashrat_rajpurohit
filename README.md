@@ -6,7 +6,7 @@
 
 [![Live Demo](https://img.shields.io/badge/🌐_Live_Demo-Click_Here-brightgreen?style=for-the-badge)](<!-- LIVE_FRONTEND_URL -->)
 [![Backend API](https://img.shields.io/badge/🔗_Backend_API-Live-blue?style=for-the-badge)](<!-- LIVE_BACKEND_URL -->)
-[![Postman Docs](https://img.shields.io/badge/📮_Postman-API_Docs-orange?style=for-the-badge)](<!-- POSTMAN_COLLECTION_URL -->)
+[![Postman Docs](https://img.shields.io/badge/📮_Postman-API_Docs-orange?style=for-the-badge)](PASTE_YOUR_POSTMAN_PUBLIC_DOC_URL_HERE)
 [![GitHub Repo](https://img.shields.io/badge/📁_GitHub-Repository-black?style=for-the-badge)](<!-- GITHUB_REPO_URL -->)
 
 ---
@@ -55,7 +55,7 @@
 |---|---|
 | 🌐 Frontend (Live) | <!-- LIVE_FRONTEND_URL --> |
 | 🔗 Backend API (Live) | <!-- LIVE_BACKEND_URL --> |
-| 📮 Postman Collection | <!-- POSTMAN_COLLECTION_URL --> |
+| 📮 Postman Collection | PASTE_YOUR_POSTMAN_PUBLIC_DOC_URL_HERE |
 | 💾 GitHub Repository | <!-- GITHUB_REPO_URL --> |
 | 📁 Dataset (Google Drive) | https://drive.google.com/drive/folders/1O4tgEesnymnLO06_qrCacGBDxSBkJeSH |
 
