@@ -1,5 +1,4 @@
 const assert = require('assert');
-const jwt = require('jsonwebtoken');
 
 const BASE_URL = process.env.API_BASE_URL || 'http://127.0.0.1:5000';
 
@@ -14,6 +13,19 @@ async function requestWithBody(path, method, payload) {
     method,
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(payload)
+  });
+  const body = await response.json();
+  return { status: response.status, body };
+}
+
+async function requestWithMethod(path, method, token, payload) {
+  const response = await fetch(`${BASE_URL}${path}`, {
+    method,
+    headers: {
+      'Content-Type': 'application/json',
+      ...(token ? { Authorization: `Bearer ${token}` } : {})
+    },
+    body: payload ? JSON.stringify(payload) : undefined
   });
   const body = await response.json();
   return { status: response.status, body };
@@ -85,8 +97,7 @@ async function run() {
   const invalidTokenRes = await requestWithMethod('/api/v1/laws', 'POST', 'invalid.jwt.token', createPayload);
   assert.strictEqual(invalidTokenRes.status, 401, 'Invalid token should return 401');
 
-  const secret = process.env.JWT_SECRET || 'test-secret';
-  const userToken = jwt.sign({ id: 'test-user-id', role: 'user' }, secret, { expiresIn: '1h' });
+  const userToken = loginRes.body.data.token;
   const forbiddenRes = await requestWithMethod('/api/v1/laws', 'POST', userToken, createPayload);
   assert.strictEqual(forbiddenRes.status, 403, 'Non-admin token should return 403');
 
