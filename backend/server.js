@@ -4,6 +4,7 @@ const cors = require('cors');
 const connectDB = require('./src/config/db');
 const lawRoutes = require('./src/routes/lawRoutes');
 const authRoutes = require('./src/routes/authRoutes');
+const jwtRoutes = require('./src/routes/jwtRoutes');
 const requestLogger = require('./src/middlewares/requestLogger');
 const { notFound, errorHandler } = require('./src/middlewares/errorHandler');
 
@@ -24,6 +25,7 @@ app.get('/', (req, res) => {
 
 app.use('/api/v1/laws', lawRoutes);
 app.use('/api/v1/auth', authRoutes);
+app.use('/api/v1/jwt', jwtRoutes);
 app.use(notFound);
 app.use(errorHandler);
 
