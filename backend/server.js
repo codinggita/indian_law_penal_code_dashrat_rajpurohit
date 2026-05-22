@@ -7,6 +7,7 @@ const authRoutes = require('./src/routes/authRoutes');
 const analyticsRoutes = require('./src/routes/analyticsRoutes');
 const statsRoutes = require('./src/routes/statsRoutes');
 const jwtRoutes = require('./src/routes/jwtRoutes');
+const adminRoutes = require('./src/routes/adminRoutes');
 const requestLogger = require('./src/middlewares/requestLogger');
 const { notFound, errorHandler } = require('./src/middlewares/errorHandler');
 
@@ -30,6 +31,7 @@ app.use('/api/v1/auth', authRoutes);
 app.use('/api/v1/analytics', analyticsRoutes);
 app.use('/api/v1/stats', statsRoutes);
 app.use('/api/v1/jwt', jwtRoutes);
+app.use('/api/v1/admin', adminRoutes);
 app.use(notFound);
 app.use(errorHandler);
 
