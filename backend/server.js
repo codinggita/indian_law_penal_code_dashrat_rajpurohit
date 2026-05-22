@@ -5,7 +5,6 @@ const connectDB = require('./src/config/db');
 const lawRoutes = require('./src/routes/lawRoutes');
 const authRoutes = require('./src/routes/authRoutes');
 const analyticsRoutes = require('./src/routes/analyticsRoutes');
-const statsRoutes = require('./src/routes/statsRoutes');
 const requestLogger = require('./src/middlewares/requestLogger');
 const { notFound, errorHandler } = require('./src/middlewares/errorHandler');
 
@@ -27,7 +26,6 @@ app.get('/', (req, res) => {
 app.use('/api/v1/laws', lawRoutes);
 app.use('/api/v1/auth', authRoutes);
 app.use('/api/v1/analytics', analyticsRoutes);
-app.use('/api/v1/stats', statsRoutes);
 app.use(notFound);
 app.use(errorHandler);
 
