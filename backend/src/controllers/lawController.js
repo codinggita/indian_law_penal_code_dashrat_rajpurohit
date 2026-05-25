@@ -2,7 +2,7 @@ const mongoose = require('mongoose');
 const lawService = require('../services/lawService');
 const asyncHandler = require('../utils/asyncHandler');
 const ApiResponse = require('../utils/apiResponse');
-const { getPagination, formatPaginatedResponse } = require('../utils/pagination');
+const { getPagination } = require('../utils/pagination');
 
 // ALLOWED_SORT_FIELDS now supports views, bookmarkCount, and importance
 const ALLOWED_SORT_FIELDS = new Set([
@@ -77,8 +77,14 @@ async function listByFilters(req, res, next, extraFilters = {}, defaultSort = 's
     lawService.countAll(filters)
   ]);
 
-  const responseData = formatPaginatedResponse(laws, total, page, limit);
-  return ApiResponse.success(res, 'Laws fetched successfully', responseData, 200);
+  const pagination = {
+    page,
+    limit,
+    total,
+    totalPages: Math.ceil(total / limit)
+  };
+
+  return ApiResponse.success(res, 'Laws fetched successfully', laws, 200, pagination);
 }
 
 exports.getAllLaws = asyncHandler(async (req, res, next) => {
@@ -105,8 +111,14 @@ exports.getAllLaws = asyncHandler(async (req, res, next) => {
     lawService.countAll(filters)
   ]);
 
-  const responseData = formatPaginatedResponse(laws, total, page, limit);
-  return ApiResponse.success(res, 'Laws fetched successfully', responseData, 200);
+  const pagination = {
+    page,
+    limit,
+    total,
+    totalPages: Math.ceil(total / limit)
+  };
+
+  return ApiResponse.success(res, 'Laws fetched successfully', laws, 200, pagination);
 });
 
 exports.getRecentLaws = asyncHandler(async (req, res, next) => listByFilters(req, res, next, {}, '-createdAt'));
