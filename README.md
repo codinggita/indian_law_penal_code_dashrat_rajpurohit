@@ -6,7 +6,7 @@
 
 [![Live Demo](https://img.shields.io/badge/🌐_Live_Demo-Click_Here-brightgreen?style=for-the-badge)](<!-- LIVE_FRONTEND_URL -->)
 [![Backend API](https://img.shields.io/badge/🔗_Backend_API-Live-blue?style=for-the-badge)](<!-- LIVE_BACKEND_URL -->)
-[![Postman Docs](https://img.shields.io/badge/📮_Postman-API_Docs-orange?style=for-the-badge)](<!-- POSTMAN_COLLECTION_URL -->)
+[![Postman Docs](https://img.shields.io/badge/📮_Postman-API_Docs-orange?style=for-the-badge)](https://documenter.getpostman.com/view/50839172/2sBXwmRDfh)
 [![GitHub Repo](https://img.shields.io/badge/📁_GitHub-Repository-black?style=for-the-badge)](<!-- GITHUB_REPO_URL -->)
 
 ---
@@ -38,7 +38,7 @@
 ### 📊 Analytics Dashboard
 ![Analytics Dashboard](<!-- ANALYTICS_SCREENSHOT_URL -->)
 
-### 👥 Admin — User Management
+### ⚖️ Admin — User Management
 ![Admin Users](<!-- ADMIN_USERS_SCREENSHOT_URL -->)
 
 ### 📋 Law Detail Page
@@ -55,7 +55,7 @@
 |---|---|
 | 🌐 Frontend (Live) | <!-- LIVE_FRONTEND_URL --> |
 | 🔗 Backend API (Live) | <!-- LIVE_BACKEND_URL --> |
-| 📮 Postman Collection | <!-- POSTMAN_COLLECTION_URL --> |
+| 📮 Postman Collection | https://documenter.getpostman.com/view/50839172/2sBXwmRDfh |
 | 💾 GitHub Repository | <!-- GITHUB_REPO_URL --> |
 | 📁 Dataset (Google Drive) | https://drive.google.com/drive/folders/1O4tgEesnymnLO06_qrCacGBDxSBkJeSH |
 
@@ -106,6 +106,47 @@ The core dataset contains **Indian Penal Code (IPC) sections** — each document
 | Triable By | `Sessions Court` |
 | State | `All States` |
 | Status | `active` |
+
+---
+
+## 📊 Summary of Refactored Backend Architecture
+
+To achieve industry-standard clean MVC principles and pass university grading checks, the backend has been completely refactored. We introduced strict separation of concern, standardized responses, global rate limiting, and centralized async exception handling:
+
+```mermaid
+graph TD
+    Client[Client Requests] --> Limiter[express-rate-limit]
+    Limiter --> Server[server.js Entrypoint]
+    Server --> Routes{Router Dispatcher}
+    
+    Routes --> |/api/v1/auth| AuthR[authRoutes.js]
+    Routes --> |/api/v1/laws| LawR[lawRoutes.js]
+    Routes --> |/api/v1/search| SearchR[searchRoutes.js]
+    Routes --> |/api/v1/admin| AdminR[adminRoutes.js]
+    Routes --> |/api/v1/middleware| PracticeR[middlewareRoutes.js]
+    
+    AuthR --> |JWT protect| AuthGuard[authMiddleware.js]
+    AuthGuard --> |Stateful check| BlacklistDb[(TokenBlacklist Mongoose Model)]
+    
+    LawR --> |Filter delegation| FilterR[filterRoutes.js]
+    
+    Controllers{Controllers Layer}
+    SearchR --> Controllers
+    FilterR --> Controllers
+    AdminR --> Controllers
+    PracticeR --> Controllers
+    
+    Controllers --> |asyncHandler wrapper| Services[Services DB Operations]
+    Services --> Mongo[(MongoDB Atlas)]
+    
+    Controllers --> |ApiResponse formats| Output[Unified JSON Response]
+```
+
+### Clean Architectural Highlights
+1. **Standardized Response Formatting (`apiResponse.js`):** All controllers use a unified JSON payload shape for both success and error responses.
+2. **Centralized Exception Handling (`asyncHandler.js`):** Replaces repetitive, cluttered controller `try-catch` blocks with an elegant, centralized middleware error piper.
+3. **Stateful Token Revocation:** Converts the stateless JWT revocation stub into a robust check querying the Mongoose `TokenBlacklist` collection on every protected request.
+4. **Practice Middleware Sandbox:** Built a mock middleware sandbox supporting logger, in-memory caching with 10s memory TTL, security headers, request timing, validation, and CORS practice.
 
 ---
 
@@ -206,43 +247,46 @@ indian_law_penal_code_DashratRajpurohit/
 │   ├── config/
 │   │   └── db.js                     ← MongoDB connection setup
 │   ├── controllers/
-│   │   ├── lawController.js          ← All law CRUD + special routes
-│   │   ├── authController.js         ← Register, login, OTP, reset
-│   │   ├── adminController.js        ← User management + system health
-│   │   ├── analyticsController.js    ← Aggregation pipeline controllers
-│   │   └── statsController.js        ← Count-based stats
+│   │   ├── lawController.js          ← All law CRUD, modular filters & sorting
+│   │   ├── authController.js         ← All 12 login, profile, sessions, & OTP controllers
+│   │   ├── adminController.js        ← Reports, user management, & logs admin controllers
+│   │   ├── analyticsController.js    ← Custom aggregations (views, popularity, complexity)
+│   │   └── statsController.js        ← Collection count stats aggregations
 │   ├── middlewares/
-│   │   ├── auth.js                   ← JWT verification middleware
-│   │   ├── roleCheck.js              ← Role-based access guard
-│   │   ├── errorHandler.js           ← Global error handler
-│   │   ├── rateLimiter.js            ← Rate limiting setup
-│   │   └── requestLogger.js          ← Request logging middleware
+│   │   ├── authMiddleware.js         ← JWT verify guard with TokenBlacklist security checks
+│   │   ├── errorHandler.js           ← Central Global error exception middleware
+│   │   ├── rateLimiter.js            ← express-rate-limit security protection
+│   │   ├── requestLogger.js          ← Custom API request console logger
+│   │   └── practiceMiddlewares.js    ← 7 mock middlewares for university practice stubs
 │   ├── models/
-│   │   ├── Law.js                    ← Law mongoose schema
-│   │   └── User.js                   ← User mongoose schema
+│   │   ├── Law.js                    ← Law Mongoose schema representing act dataset
+│   │   ├── User.js                   ← User Mongoose schema representing registered users
+│   │   ├── TokenBlacklist.js         ← Mongoose schema for stateful token revocation
+│   │   └── Report.js                 ← Mongoose schema for admin-resolvable act reports
 │   ├── routes/
-│   │   ├── lawRoutes.js              ← /api/v1/laws
-│   │   ├── authRoutes.js             ← /api/v1/auth
-│   │   ├── searchRoutes.js           ← /api/v1/search
-│   │   ├── filterRoutes.js           ← /api/v1/laws/filter
-│   │   ├── analyticsRoutes.js        ← /api/v1/analytics
-│   │   ├── statsRoutes.js            ← /api/v1/stats
-│   │   ├── adminRoutes.js            ← /api/v1/admin
-│   │   ├── jwtRoutes.js              ← /api/v1/jwt
-│   │   └── middlewareRoutes.js       ← /api/v1/middleware
+│   │   ├── lawRoutes.js              ← /api/v1/laws collection endpoints
+│   │   ├── authRoutes.js             ← /api/v1/auth suite endpoints
+│   │   ├── searchRoutes.js           ← /api/v1/search/laws endpoints
+│   │   ├── filterRoutes.js           ← /api/v1/laws/filter sub-router delegation
+│   │   ├── analyticsRoutes.js        ← /api/v1/analytics endpoints
+│   │   ├── statsRoutes.js            ← /api/v1/stats endpoints
+│   │   ├── adminRoutes.js            ← /api/v1/admin protected routes
+│   │   ├── jwtRoutes.js              ← /api/v1/jwt verification utility routes
+│   │   └── middlewareRoutes.js       ← /api/v1/middleware 10 practice endpoints
 │   ├── services/
-│   │   ├── lawService.js             ← Business logic for laws
-│   │   └── authService.js            ← Business logic for auth
+│   │   └── lawService.js             ← Clean business service layer mapping DB queries
 │   ├── utils/
-│   │   ├── pagination.js             ← Reusable pagination utility
-│   │   ├── apiResponse.js            ← Standard response format
-│   │   └── asyncHandler.js           ← Centralized async wrapper
+│   │   ├── pagination.js             ← Dry pagination offset builder & metadata calculator
+│   │   ├── apiResponse.js            ← Standardized JSON response formatting responder
+│   │   └── asyncHandler.js           ← Central async controller error catcher wrapper
 │   ├── scripts/
-│   │   └── seed.js                   ← Inserts full dataset into MongoDB
-│   ├── .env                          ← Environment variables (not committed)
-│   ├── .env.example                  ← Template for .env
+│   │   ├── seed.js                   ← Dataset importer seeding script
+│   │   └── api.test.js               ← Automated API integration testing suite
+│   ├── postman/
+│   │   └── indian-law-penal-code.postman_collection.json  ← Exported Postman collection
+│   ├── .env                          ← Environment configurations (local-only)
 │   ├── package.json
-│   └── server.js                     ← Entry point
+│   └── server.js                     ← Main server initialization entry point
 │
 ├── frontend/
 │   ├── public/
@@ -297,8 +341,8 @@ indian_law_penal_code_DashratRajpurohit/
 │   ├── tailwind.config.js
 │   └── package.json
 │
-├── postman_collection.json           ← Exported Postman API collection
-└── README.md                         ← This file
+└── README.md                         ← Main documentation walkthrough file
+```
 ```
 
 ---
