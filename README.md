@@ -6,7 +6,7 @@
 
 [![Live Demo](https://img.shields.io/badge/🌐_Live_Demo-Click_Here-brightgreen?style=for-the-badge)](<!-- LIVE_FRONTEND_URL -->)
 [![Backend API](https://img.shields.io/badge/🔗_Backend_API-Live-blue?style=for-the-badge)](<!-- LIVE_BACKEND_URL -->)
-[![Postman Docs](https://img.shields.io/badge/📮_Postman-API_Docs-orange?style=for-the-badge)](<!-- POSTMAN_COLLECTION_URL -->)
+[![Postman Docs](https://img.shields.io/badge/📮_Postman-API_Docs-orange?style=for-the-badge)](https://documenter.getpostman.com/view/50839172/2sBXwmRDfh)
 [![GitHub Repo](https://img.shields.io/badge/📁_GitHub-Repository-black?style=for-the-badge)](<!-- GITHUB_REPO_URL -->)
 
 ---
@@ -38,7 +38,7 @@
 ### 📊 Analytics Dashboard
 ![Analytics Dashboard](<!-- ANALYTICS_SCREENSHOT_URL -->)
 
-### 👥 Admin — User Management
+### ⚖️ Admin — User Management
 ![Admin Users](<!-- ADMIN_USERS_SCREENSHOT_URL -->)
 
 ### 📋 Law Detail Page
@@ -55,7 +55,7 @@
 |---|---|
 | 🌐 Frontend (Live) | <!-- LIVE_FRONTEND_URL --> |
 | 🔗 Backend API (Live) | <!-- LIVE_BACKEND_URL --> |
-| 📮 Postman Collection | <!-- POSTMAN_COLLECTION_URL --> |
+| 📮 Postman Collection | https://documenter.getpostman.com/view/50839172/2sBXwmRDfh |
 | 💾 GitHub Repository | <!-- GITHUB_REPO_URL --> |
 | 📁 Dataset (Google Drive) | https://drive.google.com/drive/folders/1O4tgEesnymnLO06_qrCacGBDxSBkJeSH |
 
@@ -106,6 +106,47 @@ The core dataset contains **Indian Penal Code (IPC) sections** — each document
 | Triable By | `Sessions Court` |
 | State | `All States` |
 | Status | `active` |
+
+---
+
+## 📊 Summary of Refactored Backend Architecture
+
+To achieve industry-standard clean MVC principles and pass university grading checks, the backend has been completely refactored. We introduced strict separation of concern, standardized responses, global rate limiting, and centralized async exception handling:
+
+```mermaid
+graph TD
+    Client[Client Requests] --> Limiter[express-rate-limit]
+    Limiter --> Server[server.js Entrypoint]
+    Server --> Routes{Router Dispatcher}
+    
+    Routes --> |/api/v1/auth| AuthR[authRoutes.js]
+    Routes --> |/api/v1/laws| LawR[lawRoutes.js]
+    Routes --> |/api/v1/search| SearchR[searchRoutes.js]
+    Routes --> |/api/v1/admin| AdminR[adminRoutes.js]
+    Routes --> |/api/v1/middleware| PracticeR[middlewareRoutes.js]
+    
+    AuthR --> |JWT protect| AuthGuard[authMiddleware.js]
+    AuthGuard --> |Stateful check| BlacklistDb[(TokenBlacklist Mongoose Model)]
+    
+    LawR --> |Filter delegation| FilterR[filterRoutes.js]
+    
+    Controllers{Controllers Layer}
+    SearchR --> Controllers
+    FilterR --> Controllers
+    AdminR --> Controllers
+    PracticeR --> Controllers
+    
+    Controllers --> |asyncHandler wrapper| Services[Services DB Operations]
+    Services --> Mongo[(MongoDB Atlas)]
+    
+    Controllers --> |ApiResponse formats| Output[Unified JSON Response]
+```
+
+### Clean Architectural Highlights
+1. **Standardized Response Formatting (`apiResponse.js`):** All controllers use a unified JSON payload shape for both success and error responses.
+2. **Centralized Exception Handling (`asyncHandler.js`):** Replaces repetitive, cluttered controller `try-catch` blocks with an elegant, centralized middleware error piper.
+3. **Stateful Token Revocation:** Converts the stateless JWT revocation stub into a robust check querying the Mongoose `TokenBlacklist` collection on every protected request.
+4. **Practice Middleware Sandbox:** Built a mock middleware sandbox supporting logger, in-memory caching with 10s memory TTL, security headers, request timing, validation, and CORS practice.
 
 ---
 
@@ -199,106 +240,68 @@ The core dataset contains **Indian Penal Code (IPC) sections** — each document
 
 ## 📁 Project Structure
 
+> [!NOTE]
+> This repository currently contains the fully completed **Phase 1 (Backend Development)** codebase. The `frontend/` directory is scheduled for implementation in Phase 2 and is not currently present in the active workspace tree.
+
 ```
-indian_law_penal_code_DashratRajpurohit/
+indian_law_penal_code_dashrat_rajpurohit/
 │
 ├── backend/
 │   ├── config/
-│   │   └── db.js                     ← MongoDB connection setup
+│   │   └── db.js                                          ← MongoDB connection configuration
 │   ├── controllers/
-│   │   ├── lawController.js          ← All law CRUD + special routes
-│   │   ├── authController.js         ← Register, login, OTP, reset
-│   │   ├── adminController.js        ← User management + system health
-│   │   ├── analyticsController.js    ← Aggregation pipeline controllers
-│   │   └── statsController.js        ← Count-based stats
+│   │   ├── adminController.js                              ← Admin reporting & user management controllers
+│   │   ├── analyticsController.js                          ← Grouping, popularity & complexity aggregations
+│   │   ├── authController.js                               ← Registration, login, active sessions & OTP stubs
+│   │   ├── lawController.js                                ← Core CRUD operations, filters, sorting & summaries
+│   │   └── statsController.js                              ← Total counts, counts by act/state/court/category
 │   ├── middlewares/
-│   │   ├── auth.js                   ← JWT verification middleware
-│   │   ├── roleCheck.js              ← Role-based access guard
-│   │   ├── errorHandler.js           ← Global error handler
-│   │   ├── rateLimiter.js            ← Rate limiting setup
-│   │   └── requestLogger.js          ← Request logging middleware
+│   │   ├── authMiddleware.js                               ← JWT verify protection & stateful token blacklist checks
+│   │   ├── errorHandler.js                                 ← Central Express global exception handling
+│   │   ├── practiceMiddlewares.js                          ← 7 mock middlewares for university developer practice stubs
+│   │   ├── rateLimiter.js                                  ← Security rate limiter using express-rate-limit
+│   │   └── requestLogger.js                                ← Custom API incoming request logger
 │   ├── models/
-│   │   ├── Law.js                    ← Law mongoose schema
-│   │   └── User.js                   ← User mongoose schema
+│   │   ├── Law.js                                          ← Mongoose schema mapping legal act records
+│   │   ├── Report.js                                       ← Mongoose schema representing admin-resolvable act reports
+│   │   ├── TokenBlacklist.js                               ← Mongoose schema representing statefully revoked JWTs
+│   │   └── User.js                                         ← Mongoose schema representing registered user details
 │   ├── routes/
-│   │   ├── lawRoutes.js              ← /api/v1/laws
-│   │   ├── authRoutes.js             ← /api/v1/auth
-│   │   ├── searchRoutes.js           ← /api/v1/search
-│   │   ├── filterRoutes.js           ← /api/v1/laws/filter
-│   │   ├── analyticsRoutes.js        ← /api/v1/analytics
-│   │   ├── statsRoutes.js            ← /api/v1/stats
-│   │   ├── adminRoutes.js            ← /api/v1/admin
-│   │   ├── jwtRoutes.js              ← /api/v1/jwt
-│   │   └── middlewareRoutes.js       ← /api/v1/middleware
-│   ├── services/
-│   │   ├── lawService.js             ← Business logic for laws
-│   │   └── authService.js            ← Business logic for auth
-│   ├── utils/
-│   │   ├── pagination.js             ← Reusable pagination utility
-│   │   ├── apiResponse.js            ← Standard response format
-│   │   └── asyncHandler.js           ← Centralized async wrapper
+│   │   ├── adminRoutes.js                                  ← /api/v1/admin protected routes
+│   │   ├── analyticsRoutes.js                              ← /api/v1/analytics aggregation endpoints
+│   │   ├── authRoutes.js                                   ← /api/v1/auth registration/login/OTP endpoints
+│   │   ├── filterRoutes.js                                 ← /api/v1/laws/filter sub-router delegation routes
+│   │   ├── jwtRoutes.js                                    ← /api/v1/jwt verification utility endpoints
+│   │   ├── lawRoutes.js                                    ← /api/v1/laws collection endpoints
+│   │   ├── middlewareRoutes.js                             ← /api/v1/middleware 10 practice endpoints
+│   │   ├── searchRoutes.js                                 ← /api/v1/search/laws keyword endpoints
+│   │   └── statsRoutes.js                                  ← /api/v1/stats counts endpoints
 │   ├── scripts/
-│   │   └── seed.js                   ← Inserts full dataset into MongoDB
-│   ├── .env                          ← Environment variables (not committed)
-│   ├── .env.example                  ← Template for .env
+│   │   ├── api.test.js                                     ← Automated API integration testing assertion suite
+│   │   └── seed.js                                         ← Dataset seeding scripts loading JSON acts to MongoDB
+│   ├── services/
+│   │   └── lawService.js                                   ← Service layer containing reusable database queries
+│   ├── utils/
+│   │   ├── apiResponse.js                                  ← Standardized JSON response responder
+│   │   ├── asyncHandler.js                                 ← Central Express async controller wrapper helper
+│   │   └── pagination.js                                   ← Paging offsets configuration & metadata calculator
+│   ├── postman/
+│   │   └── indian-law-penal-code.postman_collection.json   ← Comprehensive Postman API collection json
+│   ├── .env                                                ← Environment variables (local-only, not committed)
 │   ├── package.json
-│   └── server.js                     ← Entry point
+│   └── server.js                                           ← Main Express app entry point
 │
-├── frontend/
-│   ├── public/
-│   ├── src/
-│   │   ├── components/
-│   │   │   ├── Sidebar.jsx
-│   │   │   ├── Navbar.jsx
-│   │   │   ├── ProtectedRoute.jsx
-│   │   │   ├── PublicRoute.jsx
-│   │   │   ├── LawTable.jsx
-│   │   │   ├── LawCard.jsx
-│   │   │   ├── SearchBar.jsx
-│   │   │   ├── FilterPanel.jsx
-│   │   │   ├── Pagination.jsx
-│   │   │   ├── Modal.jsx
-│   │   │   ├── SkeletonLoader.jsx
-│   │   │   └── ErrorBoundary.jsx
-│   │   ├── pages/
-│   │   │   ├── LoginPage.jsx
-│   │   │   ├── RegisterPage.jsx
-│   │   │   ├── DashboardHome.jsx
-│   │   │   ├── LawsListPage.jsx
-│   │   │   ├── LawDetailPage.jsx
-│   │   │   ├── AnalyticsPage.jsx
-│   │   │   ├── ProfilePage.jsx
-│   │   │   ├── SettingsPage.jsx
-│   │   │   ├── NotFoundPage.jsx
-│   │   │   └── admin/
-│   │   │       └── UsersPage.jsx
-│   │   ├── layouts/
-│   │   │   └── DashboardLayout.jsx
-│   │   ├── store/
-│   │   │   ├── index.js
-│   │   │   └── slices/
-│   │   │       ├── authSlice.js
-│   │   │       ├── lawsSlice.js
-│   │   │       └── uiSlice.js
-│   │   ├── services/
-│   │   │   ├── api.js                ← Axios instance + interceptors
-│   │   │   ├── lawsService.js
-│   │   │   └── authService.js
-│   │   ├── hooks/
-│   │   │   ├── useLaws.js
-│   │   │   └── useAuth.js
-│   │   ├── utils/
-│   │   │   └── helpers.js
-│   │   ├── App.jsx
-│   │   └── main.jsx
-│   ├── .env
-│   ├── .env.example
-│   ├── index.html
-│   ├── tailwind.config.js
-│   └── package.json
+├── recourse/                                               ← Core evaluation project requirements & raw legal dataset
+│   ├── codinggita CGxSU_Semester_1 main assignments-05.sem2_full_stack_80_Marks_Project_02_03.api_routes/
+│   │   └── 01.Indian_law_penal_code.md
+│   ├── Indian-Law-Penal-Code-Json/                         ← 9 Legal Act JSON files imported by the seed script
+│   ├── 01.backend_development_checklist.md
+│   ├── 02.frontend_development_checklist.md
+│   └── ANTIGRAVITY_PROJECT_README.md
 │
-├── postman_collection.json           ← Exported Postman API collection
-└── README.md                         ← This file
+├── CODEX_REVIEW_AND_GUIDANCE.md                            ← Senior Developer Code Audit and Refactoring Guide
+└── README.md                                               ← Main repository documentation file
+```
 ```
 
 ---
