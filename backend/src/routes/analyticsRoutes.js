@@ -7,7 +7,9 @@ const {
   getByCourt,
   getRecentUpdates,
   getPopularity,
-  getComplexity
+  getComplexity,
+  getSearchTrends,
+  getUserActivity
 } = require('../controllers/analyticsController');
 
 const router = express.Router();
@@ -20,5 +22,7 @@ router.get('/laws/by-court', getByCourt);
 router.get('/laws/recent-updates', getRecentUpdates);
 router.get('/laws/popularity', getPopularity);
 router.get('/laws/complexity', getComplexity);
+router.get('/laws/search-trends', getSearchTrends);
+router.get('/laws/user-activity', getUserActivity);
 
 module.exports = router;

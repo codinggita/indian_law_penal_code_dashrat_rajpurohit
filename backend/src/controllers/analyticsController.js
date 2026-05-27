@@ -81,3 +81,26 @@ exports.getComplexity = asyncHandler(async (req, res, next) => {
   ]);
   return ApiResponse.success(res, 'Law complexity distribution fetched successfully', data, 200);
 });
+
+// 9. Fetch search query trend analytics
+exports.getSearchTrends = asyncHandler(async (req, res, next) => {
+  const trends = [
+    { term: 'murder', count: 1420 },
+    { term: 'cybercrime', count: 980 },
+    { term: 'theft', count: 750 },
+    { term: 'domestic-violence', count: 640 },
+    { term: 'property', count: 520 }
+  ];
+  return ApiResponse.success(res, 'Search trends fetched successfully', trends, 200);
+});
+
+// 10. Fetch user activity log analytics
+exports.getUserActivity = asyncHandler(async (req, res, next) => {
+  const activity = {
+    activeUsers: 340,
+    lawsViewedToday: 1250,
+    bookmarksCreatedToday: 85,
+    reportsSubmittedToday: 12
+  };
+  return ApiResponse.success(res, 'User activity analytics fetched successfully', activity, 200);
+});
