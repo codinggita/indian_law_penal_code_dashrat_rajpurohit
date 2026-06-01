@@ -243,65 +243,64 @@ graph TD
 > [!NOTE]
 > This repository currently contains the fully completed **Phase 1 (Backend Development)** codebase. The `frontend/` directory is scheduled for implementation in Phase 2 and is not currently present in the active workspace tree.
 
-```
-indian_law_penal_code_dashrat_rajpurohit/
+### Backend Folder Structure
+
+```text
+backend/
+├── postman/                         # Postman collections and API testing files
 │
-├── backend/
+├── src/
 │   ├── config/
-│   │   └── db.js                                          ← MongoDB connection configuration
+│   │   └── db.js                    # MongoDB database connection
+│   │
 │   ├── controllers/
-│   │   ├── adminController.js                              ← Admin reporting & user management controllers
-│   │   ├── analyticsController.js                          ← Grouping, popularity & complexity aggregations
-│   │   ├── authController.js                               ← Registration, login, active sessions & OTP stubs
-│   │   ├── lawController.js                                ← Core CRUD operations, filters, sorting & summaries
-│   │   └── statsController.js                              ← Total counts, counts by act/state/court/category
+│   │   ├── adminController.js       # Admin-related operations
+│   │   ├── analyticsController.js   # Analytics and reporting logic
+│   │   ├── authController.js        # Authentication & user management
+│   │   ├── jwtController.js         # JWT token generation/validation
+│   │   ├── lawController.js         # Law CRUD operations
+│   │   └── statsController.js       # Statistics endpoints
+│   │
 │   ├── middlewares/
-│   │   ├── authMiddleware.js                               ← JWT verify protection & stateful token blacklist checks
-│   │   ├── errorHandler.js                                 ← Central Express global exception handling
-│   │   ├── practiceMiddlewares.js                          ← 7 mock middlewares for university developer practice stubs
-│   │   ├── rateLimiter.js                                  ← Security rate limiter using express-rate-limit
-│   │   └── requestLogger.js                                ← Custom API incoming request logger
+│   │   ├── authMiddleware.js        # Authentication middleware
+│   │   ├── errorHandler.js          # Global error handling
+│   │   ├── practiceMiddlewares.js   # Custom application middlewares
+│   │   ├── rateLimiter.js           # API rate limiting
+│   │   └── requestLogger.js         # Request logging middleware
+│   │
 │   ├── models/
-│   │   ├── Law.js                                          ← Mongoose schema mapping legal act records
-│   │   ├── Report.js                                       ← Mongoose schema representing admin-resolvable act reports
-│   │   ├── TokenBlacklist.js                               ← Mongoose schema representing statefully revoked JWTs
-│   │   └── User.js                                         ← Mongoose schema representing registered user details
+│   │   ├── Law.js                   # Law schema/model
+│   │   ├── Report.js                # Report schema/model
+│   │   ├── TokenBlacklist.js        # Blacklisted JWT tokens
+│   │   └── User.js                  # User schema/model
+│   │
 │   ├── routes/
-│   │   ├── adminRoutes.js                                  ← /api/v1/admin protected routes
-│   │   ├── analyticsRoutes.js                              ← /api/v1/analytics aggregation endpoints
-│   │   ├── authRoutes.js                                   ← /api/v1/auth registration/login/OTP endpoints
-│   │   ├── filterRoutes.js                                 ← /api/v1/laws/filter sub-router delegation routes
-│   │   ├── jwtRoutes.js                                    ← /api/v1/jwt verification utility endpoints
-│   │   ├── lawRoutes.js                                    ← /api/v1/laws collection endpoints
-│   │   ├── middlewareRoutes.js                             ← /api/v1/middleware 10 practice endpoints
-│   │   ├── searchRoutes.js                                 ← /api/v1/search/laws keyword endpoints
-│   │   └── statsRoutes.js                                  ← /api/v1/stats counts endpoints
+│   │   ├── adminRoutes.js           # Admin API routes
+│   │   ├── analyticsRoutes.js       # Analytics API routes
+│   │   ├── authRoutes.js            # Authentication routes
+│   │   ├── filterRoutes.js          # Filtering endpoints
+│   │   ├── jwtRoutes.js             # JWT management routes
+│   │   ├── lawRoutes.js             # Law-related routes
+│   │   ├── middlewareRoutes.js      # Middleware testing routes
+│   │   ├── searchRoutes.js          # Search functionality routes
+│   │   └── statsRoutes.js           # Statistics routes
+│   │
 │   ├── scripts/
-│   │   ├── api.test.js                                     ← Automated API integration testing assertion suite
-│   │   └── seed.js                                         ← Dataset seeding scripts loading JSON acts to MongoDB
+│   │   ├── api.test.js              # API integration tests
+│   │   └── seed.js                  # Database seeding script
+│   │
 │   ├── services/
-│   │   └── lawService.js                                   ← Service layer containing reusable database queries
-│   ├── utils/
-│   │   ├── apiResponse.js                                  ← Standardized JSON response responder
-│   │   ├── asyncHandler.js                                 ← Central Express async controller wrapper helper
-│   │   └── pagination.js                                   ← Paging offsets configuration & metadata calculator
-│   ├── postman/
-│   │   └── indian-law-penal-code.postman_collection.json   ← Comprehensive Postman API collection json
-│   ├── .env                                                ← Environment variables (local-only, not committed)
-│   ├── package.json
-│   └── server.js                                           ← Main Express app entry point
+│   │   └── lawService.js            # Business logic layer for laws
+│   │
+│   └── utils/
+│       ├── apiResponse.js           # Standardized API responses
+│       ├── asyncHandler.js          # Async error wrapper
+│       └── pagination.js            # Pagination utilities
 │
-├── recourse/                                               ← Core evaluation project requirements & raw legal dataset
-│   ├── codinggita CGxSU_Semester_1 main assignments-05.sem2_full_stack_80_Marks_Project_02_03.api_routes/
-│   │   └── 01.Indian_law_penal_code.md
-│   ├── Indian-Law-Penal-Code-Json/                         ← 9 Legal Act JSON files imported by the seed script
-│   ├── 01.backend_development_checklist.md
-│   ├── 02.frontend_development_checklist.md
-│   └── ANTIGRAVITY_PROJECT_README.md
-│
-├── CODEX_REVIEW_AND_GUIDANCE.md                            ← Senior Developer Code Audit and Refactoring Guide
-└── README.md                                               ← Main repository documentation file
-```
+├── .gitignore
+├── package.json
+├── package-lock.json
+└── server.js                        # Application entry point
 ```
 
 ---
@@ -569,10 +568,17 @@ npm install
 ```bash
 # Make sure MongoDB is running first
 # Then run the seeding script to populate your DB with the full IPC dataset
-node scripts/seed.js
+node src/scripts/seed.js
 ```
 
 > ✅ You should see: `"✅ Dataset seeded successfully — X records inserted"`
+
+### Step 2.5 — Run Integration Tests (Optional)
+
+```bash
+# Verify the backend endpoints against the automated assertion test suite
+npm run test:api
+```
 
 ### Step 3 — Start Backend Server
 
