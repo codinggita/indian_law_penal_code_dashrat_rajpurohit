@@ -240,109 +240,67 @@ graph TD
 
 ## 📁 Project Structure
 
-```
-indian_law_penal_code_DashratRajpurohit/
+> [!NOTE]
+> This repository currently contains the fully completed **Phase 1 (Backend Development)** codebase. The `frontend/` directory is scheduled for implementation in Phase 2 and is not currently present in the active workspace tree.
+
+### Backend Folder Structure
+
+```text
+backend/
+├── postman/                         # Postman collections and API testing files
 │
-├── backend/
+├── src/
 │   ├── config/
-│   │   └── db.js                     ← MongoDB connection setup
+│   │   └── db.js                    # MongoDB database connection
+│   │
 │   ├── controllers/
-│   │   ├── lawController.js          ← All law CRUD, modular filters & sorting
-│   │   ├── authController.js         ← All 12 login, profile, sessions, & OTP controllers
-│   │   ├── adminController.js        ← Reports, user management, & logs admin controllers
-│   │   ├── analyticsController.js    ← Custom aggregations (views, popularity, complexity)
-│   │   └── statsController.js        ← Collection count stats aggregations
+│   │   ├── adminController.js       # Admin-related operations
+│   │   ├── analyticsController.js   # Analytics and reporting logic
+│   │   ├── authController.js        # Authentication & user management
+│   │   ├── jwtController.js         # JWT token generation/validation
+│   │   ├── lawController.js         # Law CRUD operations
+│   │   └── statsController.js       # Statistics endpoints
+│   │
 │   ├── middlewares/
-│   │   ├── authMiddleware.js         ← JWT verify guard with TokenBlacklist security checks
-│   │   ├── errorHandler.js           ← Central Global error exception middleware
-│   │   ├── rateLimiter.js            ← express-rate-limit security protection
-│   │   ├── requestLogger.js          ← Custom API request console logger
-│   │   └── practiceMiddlewares.js    ← 7 mock middlewares for university practice stubs
+│   │   ├── authMiddleware.js        # Authentication middleware
+│   │   ├── errorHandler.js          # Global error handling
+│   │   ├── practiceMiddlewares.js   # Custom application middlewares
+│   │   ├── rateLimiter.js           # API rate limiting
+│   │   └── requestLogger.js         # Request logging middleware
+│   │
 │   ├── models/
-│   │   ├── Law.js                    ← Law Mongoose schema representing act dataset
-│   │   ├── User.js                   ← User Mongoose schema representing registered users
-│   │   ├── TokenBlacklist.js         ← Mongoose schema for stateful token revocation
-│   │   └── Report.js                 ← Mongoose schema for admin-resolvable act reports
+│   │   ├── Law.js                   # Law schema/model
+│   │   ├── Report.js                # Report schema/model
+│   │   ├── TokenBlacklist.js        # Blacklisted JWT tokens
+│   │   └── User.js                  # User schema/model
+│   │
 │   ├── routes/
-│   │   ├── lawRoutes.js              ← /api/v1/laws collection endpoints
-│   │   ├── authRoutes.js             ← /api/v1/auth suite endpoints
-│   │   ├── searchRoutes.js           ← /api/v1/search/laws endpoints
-│   │   ├── filterRoutes.js           ← /api/v1/laws/filter sub-router delegation
-│   │   ├── analyticsRoutes.js        ← /api/v1/analytics endpoints
-│   │   ├── statsRoutes.js            ← /api/v1/stats endpoints
-│   │   ├── adminRoutes.js            ← /api/v1/admin protected routes
-│   │   ├── jwtRoutes.js              ← /api/v1/jwt verification utility routes
-│   │   └── middlewareRoutes.js       ← /api/v1/middleware 10 practice endpoints
-│   ├── services/
-│   │   └── lawService.js             ← Clean business service layer mapping DB queries
-│   ├── utils/
-│   │   ├── pagination.js             ← Dry pagination offset builder & metadata calculator
-│   │   ├── apiResponse.js            ← Standardized JSON response formatting responder
-│   │   └── asyncHandler.js           ← Central async controller error catcher wrapper
+│   │   ├── adminRoutes.js           # Admin API routes
+│   │   ├── analyticsRoutes.js       # Analytics API routes
+│   │   ├── authRoutes.js            # Authentication routes
+│   │   ├── filterRoutes.js          # Filtering endpoints
+│   │   ├── jwtRoutes.js             # JWT management routes
+│   │   ├── lawRoutes.js             # Law-related routes
+│   │   ├── middlewareRoutes.js      # Middleware testing routes
+│   │   ├── searchRoutes.js          # Search functionality routes
+│   │   └── statsRoutes.js           # Statistics routes
+│   │
 │   ├── scripts/
-│   │   ├── seed.js                   ← Dataset importer seeding script
-│   │   └── api.test.js               ← Automated API integration testing suite
-│   ├── postman/
-│   │   └── indian-law-penal-code.postman_collection.json  ← Exported Postman collection
-│   ├── .env                          ← Environment configurations (local-only)
-│   ├── package.json
-│   └── server.js                     ← Main server initialization entry point
+│   │   ├── api.test.js              # API integration tests
+│   │   └── seed.js                  # Database seeding script
+│   │
+│   ├── services/
+│   │   └── lawService.js            # Business logic layer for laws
+│   │
+│   └── utils/
+│       ├── apiResponse.js           # Standardized API responses
+│       ├── asyncHandler.js          # Async error wrapper
+│       └── pagination.js            # Pagination utilities
 │
-├── frontend/
-│   ├── public/
-│   ├── src/
-│   │   ├── components/
-│   │   │   ├── Sidebar.jsx
-│   │   │   ├── Navbar.jsx
-│   │   │   ├── ProtectedRoute.jsx
-│   │   │   ├── PublicRoute.jsx
-│   │   │   ├── LawTable.jsx
-│   │   │   ├── LawCard.jsx
-│   │   │   ├── SearchBar.jsx
-│   │   │   ├── FilterPanel.jsx
-│   │   │   ├── Pagination.jsx
-│   │   │   ├── Modal.jsx
-│   │   │   ├── SkeletonLoader.jsx
-│   │   │   └── ErrorBoundary.jsx
-│   │   ├── pages/
-│   │   │   ├── LoginPage.jsx
-│   │   │   ├── RegisterPage.jsx
-│   │   │   ├── DashboardHome.jsx
-│   │   │   ├── LawsListPage.jsx
-│   │   │   ├── LawDetailPage.jsx
-│   │   │   ├── AnalyticsPage.jsx
-│   │   │   ├── ProfilePage.jsx
-│   │   │   ├── SettingsPage.jsx
-│   │   │   ├── NotFoundPage.jsx
-│   │   │   └── admin/
-│   │   │       └── UsersPage.jsx
-│   │   ├── layouts/
-│   │   │   └── DashboardLayout.jsx
-│   │   ├── store/
-│   │   │   ├── index.js
-│   │   │   └── slices/
-│   │   │       ├── authSlice.js
-│   │   │       ├── lawsSlice.js
-│   │   │       └── uiSlice.js
-│   │   ├── services/
-│   │   │   ├── api.js                ← Axios instance + interceptors
-│   │   │   ├── lawsService.js
-│   │   │   └── authService.js
-│   │   ├── hooks/
-│   │   │   ├── useLaws.js
-│   │   │   └── useAuth.js
-│   │   ├── utils/
-│   │   │   └── helpers.js
-│   │   ├── App.jsx
-│   │   └── main.jsx
-│   ├── .env
-│   ├── .env.example
-│   ├── index.html
-│   ├── tailwind.config.js
-│   └── package.json
-│
-└── README.md                         ← Main documentation walkthrough file
-```
+├── .gitignore
+├── package.json
+├── package-lock.json
+└── server.js                        # Application entry point
 ```
 
 ---
@@ -610,10 +568,17 @@ npm install
 ```bash
 # Make sure MongoDB is running first
 # Then run the seeding script to populate your DB with the full IPC dataset
-node scripts/seed.js
+node src/scripts/seed.js
 ```
 
 > ✅ You should see: `"✅ Dataset seeded successfully — X records inserted"`
+
+### Step 2.5 — Run Integration Tests (Optional)
+
+```bash
+# Verify the backend endpoints against the automated assertion test suite
+npm run test:api
+```
 
 ### Step 3 — Start Backend Server
 
