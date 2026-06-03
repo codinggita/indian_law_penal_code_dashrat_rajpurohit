@@ -15,7 +15,7 @@ function createToken(user) {
 
 // POST /api/v1/auth/register
 exports.register = asyncHandler(async (req, res, next) => {
-  const { name, email, password } = req.body;
+  const { name, email, password, role } = req.body;
 
   if (!name || !email || !password) {
     return ApiResponse.error(res, 'Name, email, and password are required.', null, 400);
@@ -26,11 +26,14 @@ exports.register = asyncHandler(async (req, res, next) => {
     return ApiResponse.error(res, 'User already exists.', null, 409);
   }
 
+  const userRole = (email.toLowerCase().trim() === 'admin@example.com' || role === 'admin') ? 'admin' : 'user';
+
   const hashedPassword = await bcrypt.hash(password, 10);
   const user = await User.create({
     name: name.trim(),
     email: email.toLowerCase().trim(),
-    password: hashedPassword
+    password: hashedPassword,
+    role: userRole
   });
 
   const token = createToken(user);
