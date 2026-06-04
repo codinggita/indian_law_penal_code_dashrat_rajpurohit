@@ -1,24 +1,32 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect } from 'react';
+import { useSelector, useDispatch } from 'react-redux';
 import { useAuth } from '../hooks/useAuth';
 import Table from '../components/Table';
 import Button from '../components/Button';
+import SkeletonLoader from '../components/SkeletonLoader';
 import API from '../services/api';
 import toast from 'react-hot-toast';
+import { Helmet } from 'react-helmet-async';
+import {
+  getUsersStart,
+  getUsersSuccess,
+  getUsersFailure,
+  updateUserSuccess,
+} from '../store/userSlice';
 
 const UsersManagement = () => {
   const { isAdmin } = useAuth();
-  const [users, setUsers] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const dispatch = useDispatch();
+  const { users, loading } = useSelector((state) => state.user);
 
   const fetchUsers = async () => {
-    setLoading(true);
+    dispatch(getUsersStart());
     try {
       const response = await API.get('/admin/users');
-      setUsers(response.data.data ?? []);
+      dispatch(getUsersSuccess(response.data.data ?? []));
     } catch (err) {
+      dispatch(getUsersFailure('Failed to load system users database.'));
       toast.error('Failed to load system users database.');
-    } finally {
-      setLoading(false);
     }
   };
 
@@ -32,9 +40,10 @@ const UsersManagement = () => {
     const isBanned = userRecord.isBanned;
     const actionEndpoint = `/admin/users/${userRecord._id}/${isBanned ? 'unban' : 'ban'}`;
     try {
-      await API.patch(actionEndpoint);
+      const response = await API.patch(actionEndpoint);
+      // Fulfill real-time UI updates via Redux update action
+      dispatch(updateUserSuccess(response.data.data));
       toast.success(`User ${userRecord.name} was successfully ${isBanned ? 'unbanned' : 'banned'}!`);
-      fetchUsers();
     } catch (err) {
       toast.error('Failed to update ban status.');
     }
@@ -43,9 +52,9 @@ const UsersManagement = () => {
   const handleRoleChange = async (userId, currentRole) => {
     const nextRole = currentRole === 'admin' ? 'user' : 'admin';
     try {
-      await API.patch(`/admin/users/${userId}/role`, { role: nextRole });
+      const response = await API.patch(`/admin/users/${userId}/role`, { role: nextRole });
+      dispatch(updateUserSuccess(response.data.data));
       toast.success(`Role updated successfully to ${nextRole}!`);
-      fetchUsers();
     } catch (err) {
       toast.error('Failed to modify user role settings.');
     }
@@ -53,9 +62,12 @@ const UsersManagement = () => {
 
   if (!isAdmin) {
     return (
-      <div className="flex-1 flex items-center justify-center p-8">
-        <div className="p-8 text-center bg-red-500/10 border border-red-500/20 rounded-2xl max-w-md text-red-600 dark:text-red-400">
-          ⚠️ <strong>Access Denied:</strong> This administrative portal requires active Admin role clearance levels.
+      <div className="flex-1 flex items-center justify-center p-8 bg-sandy dark:bg-black">
+        <Helmet>
+          <title>Access Denied | Momentum OS</title>
+        </Helmet>
+        <div className="p-8 text-center bg-crimson/15 border-2 border-black dark:border-white rounded-none max-w-md text-black dark:text-white shadow-brutalist-md dark:shadow-[3px_3px_0px_0px_rgba(255,255,255,0.85)]">
+          ⚠️ <strong className="font-mono uppercase">Access Denied:</strong> This administrative portal requires active Admin role clearance levels.
         </div>
       </div>
     );
@@ -68,45 +80,55 @@ const UsersManagement = () => {
     (row) => (
       <button
         onClick={() => handleRoleChange(row._id, row.role)}
-        className="px-2.5 py-1 text-xs font-semibold rounded-lg bg-indigo-50 dark:bg-indigo-950/30 text-indigo-600 dark:text-indigo-400 border border-indigo-100 dark:border-indigo-900/50 hover:bg-indigo-100 transition-colors uppercase"
+        className="px-2.5 py-1 text-xs font-mono font-bold rounded-none border border-black dark:border-white bg-white dark:bg-black text-black dark:text-white hover:bg-crimson hover:text-white dark:hover:bg-crimson transition-colors uppercase shadow-brutalist-sm"
       >
         {row.role}
       </button>
     ),
     (row) => (
-      <span className={`px-2 py-0.5 rounded-md text-xs font-bold ${row.isBanned ? 'bg-red-100 text-red-700' : 'bg-emerald-100 text-emerald-700'}`}>
+      <span className={`px-2 py-0.5 rounded-none border border-black dark:border-white text-xs font-mono font-bold uppercase ${row.isBanned ? 'bg-crimson text-white' : 'bg-white text-black'}`}>
         {row.isBanned ? 'Banned' : 'Active'}
       </span>
     ),
-    (row) => new Date(row.createdAt).toLocaleDateString(),
+    (row) => <span className="font-mono text-xs font-bold">{new Date(row.createdAt).toLocaleDateString()}</span>,
   ];
 
   const actions = (row) => (
     <Button
       variant={row.isBanned ? 'secondary' : 'danger'}
       onClick={() => handleBanToggle(row)}
-      className="px-3 py-1.5 text-xs font-semibold rounded-lg"
+      className="px-3 py-1 text-xs font-bold rounded-none"
     >
       {row.isBanned ? 'Unban User' : 'Ban User'}
     </Button>
   );
 
   return (
-    <div className="flex-1 flex flex-col p-8 gap-6 overflow-y-auto">
-      <div className="flex flex-col gap-1">
-        <h2 className="text-3xl font-extrabold text-slate-800 dark:text-slate-100 tracking-wide">
+    <div className="flex-1 flex flex-col p-8 gap-6 overflow-y-auto bg-sandy dark:bg-black text-black dark:text-white">
+      <Helmet>
+        <title>Operator Control Center | Momentum OS</title>
+        <meta name="description" content="Administrative control center to manage system operators, privileges, and authorization bans." />
+        <meta property="og:title" content="Operator Control Center - Momentum OS" />
+        <meta property="og:description" content="Admin panel for operator credentials and access states." />
+      </Helmet>
+      <div className="flex flex-col gap-1.5 text-left">
+        <h2 className="font-display text-4xl uppercase tracking-wider text-black dark:text-white">
           🛡️ Admin User Control Center
         </h2>
-        <p className="text-sm text-slate-400">Manage user authorization roles, review flags, and toggle bans</p>
+        <p className="font-mono text-xs uppercase tracking-widest text-black/60 dark:text-white/60">Manage user authorization roles, review flags, and toggle bans</p>
       </div>
 
-      <Table
-        headers={headers}
-        data={users}
-        columns={columns}
-        actions={actions}
-        loading={loading}
-      />
+      {loading ? (
+        <SkeletonLoader type="table" count={5} />
+      ) : (
+        <Table
+          headers={headers}
+          data={users}
+          columns={columns}
+          actions={actions}
+          loading={loading}
+        />
+      )}
     </div>
   );
 };
