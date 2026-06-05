@@ -47,6 +47,7 @@ function buildFilters(query) {
   if (query.act) filters.actName = query.act;
   if (query.category) filters.category = query.category;
   if (query.state) filters.state = query.state;
+  if (query.importance) filters.importance = query.importance;
 
   const bailable = parseBoolean(query.bailable);
   if (bailable !== undefined) filters.bailable = bailable;
