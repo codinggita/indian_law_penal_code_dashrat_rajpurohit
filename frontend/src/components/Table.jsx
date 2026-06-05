@@ -11,9 +11,9 @@ const Table = ({
 }) => {
   return (
     <div className="w-full flex flex-col gap-4">
-      <div className="overflow-x-auto rounded-2xl border border-slate-100 dark:border-slate-800/40 bg-white/50 dark:bg-slate-900/50 backdrop-blur-sm shadow-xl">
-        <table className="min-w-full divide-y divide-slate-100 dark:divide-slate-800/40 text-left text-sm text-slate-700 dark:text-slate-300">
-          <thead className="bg-slate-50/50 dark:bg-slate-950/20 text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">
+      <div className="overflow-x-auto rounded-none border-2 border-black dark:border-white bg-[#EAE7DC] dark:bg-zinc-950 shadow-brutalist-lg dark:shadow-[4px_4px_0px_0px_rgba(255,255,255,0.85)]">
+        <table className="min-w-full divide-y-2 divide-black dark:divide-white text-left text-sm text-black dark:text-white">
+          <thead className="bg-[#D8D4C7] dark:bg-zinc-900 text-xs font-mono font-bold uppercase tracking-wider text-black dark:text-white border-b-2 border-black dark:border-white">
             <tr>
               {headers.map((header, idx) => (
                 <th key={idx} className="px-6 py-4">
@@ -23,25 +23,25 @@ const Table = ({
               {actions && <th className="px-6 py-4 text-right">Actions</th>}
             </tr>
           </thead>
-          <tbody className="divide-y divide-slate-100 dark:divide-slate-800/30">
+          <tbody className="divide-y divide-black/20 dark:divide-white/20">
             {loading ? (
               <tr>
                 <td colSpan={headers.length + (actions ? 1 : 0)} className="px-6 py-10 text-center">
-                  <div className="inline-flex h-8 w-8 animate-spin rounded-full border-4 border-indigo-500 border-t-transparent"></div>
-                  <p className="mt-2 text-slate-400">Loading records...</p>
+                  <div className="inline-flex h-8 w-8 animate-spin rounded-full border-4 border-crimson border-t-transparent"></div>
+                  <p className="mt-2 font-mono text-xs font-bold text-black/60 dark:text-white/60">LOADING RECORDS...</p>
                 </td>
               </tr>
             ) : data.length === 0 ? (
               <tr>
-                <td colSpan={headers.length + (actions ? 1 : 0)} className="px-6 py-10 text-center text-slate-400">
-                  📂 No records found matching the current criteria.
+                <td colSpan={headers.length + (actions ? 1 : 0)} className="px-6 py-10 text-center font-mono text-xs font-bold text-black/60 dark:text-white/60">
+                  📂 NO RECORDS FOUND MATCHING THE CURRENT CRITERIA
                 </td>
               </tr>
             ) : (
               data.map((row, rowIdx) => (
-                <tr key={rowIdx} className="hover:bg-slate-50/40 dark:hover:bg-slate-900/30 transition-colors">
+                <tr key={rowIdx} className="hover:bg-[#D8D4C7]/40 dark:hover:bg-zinc-900/40 transition-colors">
                   {columns.map((col, colIdx) => (
-                    <td key={colIdx} className="px-6 py-4 font-medium whitespace-nowrap">
+                    <td key={colIdx} className="px-6 py-4 font-semibold whitespace-nowrap">
                       {typeof col === 'function' ? col(row) : row[col] ?? '—'}
                     </td>
                   ))}
@@ -59,25 +59,24 @@ const Table = ({
 
       {/* Pagination Controls */}
       {pagination && onPageChange && pagination.totalPages > 1 && (
-        <div className="flex items-center justify-between px-4 py-2">
-          <span className="text-xs text-slate-500">
-            Showing Page <span className="font-semibold text-slate-700 dark:text-slate-300">{pagination.page}</span> of{' '}
-            <span className="font-semibold text-slate-700 dark:text-slate-300">{pagination.totalPages}</span> ({pagination.total} total)
+        <div className="flex flex-col sm:flex-row items-center justify-between gap-4 px-4 py-2">
+          <span className="font-mono text-xs font-bold text-black/60 dark:text-white/60">
+            SHOWING PAGE {pagination.page} OF {pagination.totalPages} ({pagination.total} TOTAL)
           </span>
           <div className="flex gap-2">
             <button
               onClick={() => onPageChange(pagination.page - 1)}
               disabled={pagination.page <= 1}
-              className="px-3 py-1.5 rounded-lg border border-slate-200 dark:border-slate-800 text-xs font-semibold hover:bg-slate-100 dark:hover:bg-slate-800 disabled:opacity-40 transition-colors"
+              className="px-4 py-2 rounded-none border-2 border-black dark:border-white text-xs font-mono uppercase font-bold bg-[#EAE7DC] dark:bg-black hover:bg-[#D8D4C7] dark:hover:bg-zinc-800 disabled:opacity-40 disabled:pointer-events-none transition-all duration-150 transform hover:-translate-x-[1px] hover:-translate-y-[1px] hover:shadow-brutalist-sm dark:hover:shadow-[2px_2px_0px_0px_rgba(255,255,255,0.85)] active:translate-x-[1px] active:translate-y-[1px] active:shadow-none"
             >
-              Previous
+              PREVIOUS
             </button>
             <button
               onClick={() => onPageChange(pagination.page + 1)}
               disabled={pagination.page >= pagination.totalPages}
-              className="px-3 py-1.5 rounded-lg border border-slate-200 dark:border-slate-800 text-xs font-semibold hover:bg-slate-100 dark:hover:bg-slate-800 disabled:opacity-40 transition-colors"
+              className="px-4 py-2 rounded-none border-2 border-black dark:border-white text-xs font-mono uppercase font-bold bg-[#EAE7DC] dark:bg-black hover:bg-[#D8D4C7] dark:hover:bg-zinc-800 disabled:opacity-40 disabled:pointer-events-none transition-all duration-150 transform hover:-translate-x-[1px] hover:-translate-y-[1px] hover:shadow-brutalist-sm dark:hover:shadow-[2px_2px_0px_0px_rgba(255,255,255,0.85)] active:translate-x-[1px] active:translate-y-[1px] active:shadow-none"
             >
-              Next
+              NEXT
             </button>
           </div>
         </div>
