@@ -14,7 +14,7 @@ const Register = () => {
   const dispatch = useDispatch();
 
   const formik = useFormik({
-    initialState: {
+    initialValues: {
       name: '',
       email: '',
       password: '',

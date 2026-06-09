@@ -14,7 +14,7 @@ const Login = () => {
   const dispatch = useDispatch();
 
   const formik = useFormik({
-    initialState: {
+    initialValues: {
       email: '',
       password: '',
     },
