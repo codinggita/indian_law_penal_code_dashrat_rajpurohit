@@ -6,7 +6,7 @@ const mongoose = require('mongoose');
 const Law = require('../models/Law');
 
 const DATASET_DIR_CANDIDATES = [
-  path.resolve(__dirname, '../../../recourse/Indian-Law-Penal-Code-Json'),
+  path.resolve(__dirname, '../../../resourse/Indian-Law-Penal-Code-Json'),
   path.resolve(__dirname, '../../../Indian-Law-Penal-Code-Json')
 ];
 
@@ -36,7 +36,7 @@ function getDatasetDir() {
   const datasetDir = DATASET_DIR_CANDIDATES.find((candidate) => fs.existsSync(candidate));
 
   if (!datasetDir) {
-    throw new Error('Dataset folder not found. Expected recourse/Indian-Law-Penal-Code-Json or Indian-Law-Penal-Code-Json.');
+    throw new Error('Dataset folder not found. Expected resourse/Indian-Law-Penal-Code-Json or Indian-Law-Penal-Code-Json.');
   }
 
   return datasetDir;
