@@ -1,3 +1,4 @@
+// Global ErrorBoundary component with system-halt diagnostic screen
 import React from 'react';
 
 class ErrorBoundary extends React.Component {

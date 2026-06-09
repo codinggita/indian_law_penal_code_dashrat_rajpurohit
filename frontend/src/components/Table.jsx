@@ -1,3 +1,4 @@
+// Reusable Brutalist Table component with built-in loading and pagination states
 import React from 'react';
 
 const Table = ({
