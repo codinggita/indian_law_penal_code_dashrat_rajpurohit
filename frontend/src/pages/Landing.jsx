@@ -92,7 +92,7 @@ const Landing = () => {
             <img
               alt="Industrial gears and machinery"
               className="w-full h-full object-cover filter grayscale contrast-125"
-              src="https://lh3.googleusercontent.com/aida/AP1WRLsJCXopfsYA-t5fb9biHWHWtkwAenfmM8pOio_72M9Uk4BVqhTtAWsxfn_zjutZGam53thHJHTm2ol_ICO83HTD9XLJakty8Nt9HUq5OTW2S-7OYa9n1J4LjHuZuozr5FE3K3szh8Su0G3O2S0EMURnvtGlDHTecMHt1cJmb2HJ0A6zuE8l30od6EDgfzZXqKKdD6vEK0tu4WKxgrVn4IVNuZI9ZDdwCMRr3OtVpoXppVuWcl9Zr2TFESY"
+              src="/constructivist_machinery.png"
             />
           </div>
         </section>
