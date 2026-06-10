@@ -4,6 +4,7 @@ import toast from 'react-hot-toast';
 import Button from '../components/Button';
 import Modal from '../components/Modal';
 import Input from '../components/Input';
+import { useAuth } from '../hooks/useAuth';
 
 const initialCases = [
   {
@@ -45,6 +46,7 @@ const initialCases = [
 ];
 
 const CaseFiles = () => {
+  const { isAdmin } = useAuth();
   const [cases, setCases] = useState(initialCases);
   const [isModalOpen, setIsModalOpen] = useState(false);
   
@@ -130,23 +132,25 @@ const CaseFiles = () => {
                   <span className="text-black/50">{c.updatedAt}</span>
                 </div>
                 
-                {/* Drag / Transition Controls */}
-                <div className="flex border-t-2 border-black mt-3 pt-2 gap-2 opacity-80 group-hover:opacity-100 transition-opacity">
-                  <button
-                    onClick={() => handleMoveCase(c.id, -1)}
-                    disabled={statusName === 'fir'}
-                    className="flex-1 py-1 border border-black bg-white hover:bg-black hover:text-white disabled:opacity-40 disabled:hover:bg-white disabled:hover:text-black font-mono text-[9px] font-black uppercase"
-                  >
-                    ◀ BACK
-                  </button>
-                  <button
-                    onClick={() => handleMoveCase(c.id, 1)}
-                    disabled={statusName === 'disposed'}
-                    className="flex-1 py-1 border border-black bg-black text-white hover:bg-brand-crimson disabled:opacity-40 disabled:hover:bg-black font-mono text-[9px] font-black uppercase"
-                  >
-                    NEXT ▶
-                  </button>
-                </div>
+                {/* Drag / Transition Controls — Admin only */}
+                {isAdmin && (
+                  <div className="flex border-t-2 border-black mt-3 pt-2 gap-2 opacity-80 group-hover:opacity-100 transition-opacity">
+                    <button
+                      onClick={() => handleMoveCase(c.id, -1)}
+                      disabled={statusName === 'fir'}
+                      className="flex-1 py-1 border border-black bg-white hover:bg-black hover:text-white disabled:opacity-40 disabled:hover:bg-white disabled:hover:text-black font-mono text-[9px] font-black uppercase"
+                    >
+                      ◀ BACK
+                    </button>
+                    <button
+                      onClick={() => handleMoveCase(c.id, 1)}
+                      disabled={statusName === 'disposed'}
+                      className="flex-1 py-1 border border-black bg-black text-white hover:bg-brand-crimson disabled:opacity-40 disabled:hover:bg-black font-mono text-[9px] font-black uppercase"
+                    >
+                      NEXT ▶
+                    </button>
+                  </div>
+                )}
               </div>
             ))
           )}
@@ -172,13 +176,20 @@ const CaseFiles = () => {
             Track statutory enforcement actions, investigations, and judicial trial stages
           </p>
         </div>
-        <button
-          onClick={() => setIsModalOpen(true)}
-          className="brutal-border bg-black text-white px-4 py-2 font-display text-lg uppercase tracking-wider shadow-brutal hover:bg-brand-crimson active:translate-x-[2px] active:translate-y-[2px] active:shadow-none flex items-center gap-2"
-        >
-          <span className="material-symbols-outlined text-base">create_new_folder</span>
-          REGISTER CASE
-        </button>
+        {isAdmin && (
+          <button
+            onClick={() => setIsModalOpen(true)}
+            className="brutal-border bg-black text-white px-4 py-2 font-display text-lg uppercase tracking-wider shadow-brutal hover:bg-brand-crimson active:translate-x-[2px] active:translate-y-[2px] active:shadow-none flex items-center gap-2"
+          >
+            <span className="material-symbols-outlined text-base">create_new_folder</span>
+            REGISTER CASE
+          </button>
+        )}
+        {!isAdmin && (
+          <span className="font-mono text-xs font-bold uppercase px-3 py-1.5 border-2 border-black bg-amber-100 text-black shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]">
+            🔒 READ-ONLY MODE // CLEARANCE LEVEL 1
+          </span>
+        )}
       </div>
 
       <div className="grid grid-cols-1 xl:grid-cols-5 gap-8">

@@ -3,8 +3,10 @@ import { Helmet } from 'react-helmet-async';
 import API from '../services/api';
 import toast from 'react-hot-toast';
 import SkeletonLoader from '../components/SkeletonLoader';
+import { useAuth } from '../hooks/useAuth';
 
 const Analytics = () => {
+  const { isAdmin } = useAuth();
   const [loading, setLoading] = useState(true);
   const [exporting, setExporting] = useState(false);
   
@@ -86,14 +88,20 @@ const Analytics = () => {
             STATUTORY INTELLIGENCE // PERFORMANCE MATRIX
           </p>
         </div>
-        <button
-          onClick={handleExportPdf}
-          disabled={exporting}
-          className="brutal-border bg-jurist-primary text-white px-5 py-2.5 font-display text-xl uppercase tracking-wider shadow-brutal hover:bg-black active:translate-x-[2px] active:translate-y-[2px] active:shadow-none flex items-center gap-2 disabled:opacity-50"
-        >
-          <span className="material-symbols-outlined text-base">download_for_offline</span>
-          {exporting ? 'EXPORTING PDF...' : 'EXPORT SYSTEM ANALYSIS'}
-        </button>
+        {isAdmin ? (
+          <button
+            onClick={handleExportPdf}
+            disabled={exporting}
+            className="brutal-border bg-jurist-primary text-white px-5 py-2.5 font-display text-xl uppercase tracking-wider shadow-brutal hover:bg-black active:translate-x-[2px] active:translate-y-[2px] active:shadow-none flex items-center gap-2 disabled:opacity-50"
+          >
+            <span className="material-symbols-outlined text-base">download_for_offline</span>
+            {exporting ? 'EXPORTING PDF...' : 'EXPORT SYSTEM ANALYSIS'}
+          </button>
+        ) : (
+          <span className="font-mono text-xs font-bold uppercase px-3 py-1.5 border-2 border-black bg-amber-100 text-black shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]">
+            🔒 READ-ONLY MODE // CLEARANCE LEVEL 1
+          </span>
+        )}
       </header>
 
       {/* KPI Bento Grid */}

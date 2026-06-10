@@ -4,6 +4,7 @@ import toast from 'react-hot-toast';
 import Button from '../components/Button';
 import Modal from '../components/Modal';
 import Input from '../components/Input';
+import { useAuth } from '../hooks/useAuth';
 
 const initialMembers = [
   {
@@ -54,6 +55,7 @@ const initialMembers = [
 ];
 
 const TeamDirectory = () => {
+  const { isAdmin } = useAuth();
   const [members, setMembers] = useState(initialMembers);
   const [search, setSearch] = useState('');
   const [filterRole, setFilterRole] = useState('ALL');
@@ -123,13 +125,20 @@ const TeamDirectory = () => {
             Query active operators, clearance levels, and identity badges
           </p>
         </div>
-        <button
-          onClick={() => setIsModalOpen(true)}
-          className="brutal-border bg-black text-white px-4 py-2 font-display text-lg uppercase tracking-wider shadow-brutal hover:bg-brand-crimson active:translate-x-[2px] active:translate-y-[2px] active:shadow-none flex items-center gap-2"
-        >
-          <span className="material-symbols-outlined text-base">person_add</span>
-          ENLIST MEMBER
-        </button>
+        {isAdmin && (
+          <button
+            onClick={() => setIsModalOpen(true)}
+            className="brutal-border bg-black text-white px-4 py-2 font-display text-lg uppercase tracking-wider shadow-brutal hover:bg-brand-crimson active:translate-x-[2px] active:translate-y-[2px] active:shadow-none flex items-center gap-2"
+          >
+            <span className="material-symbols-outlined text-base">person_add</span>
+            ENLIST MEMBER
+          </button>
+        )}
+        {!isAdmin && (
+          <span className="font-mono text-xs font-bold uppercase px-3 py-1.5 border-2 border-black bg-amber-100 text-black shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]">
+            🔒 READ-ONLY MODE // CLEARANCE LEVEL 1
+          </span>
+        )}
       </div>
 
       <div className="grid grid-cols-1 xl:grid-cols-4 gap-8">
@@ -222,12 +231,14 @@ const TeamDirectory = () => {
                     </div>
                   </div>
 
-                  <button
-                    onClick={() => handleDecommission(m.id, m.name)}
-                    className="w-full py-2 brutal-btn-outline text-xs text-center font-bold"
-                  >
-                    DECOMMISSION OPERATOR
-                  </button>
+                  {isAdmin && (
+                    <button
+                      onClick={() => handleDecommission(m.id, m.name)}
+                      className="w-full py-2 brutal-btn-outline text-xs text-center font-bold"
+                    >
+                      DECOMMISSION OPERATOR
+                    </button>
+                  )}
                 </div>
               ))}
             </div>
