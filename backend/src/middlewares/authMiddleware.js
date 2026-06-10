@@ -1,6 +1,7 @@
 const jwt = require('jsonwebtoken');
+const TokenBlacklist = require('../models/TokenBlacklist');
 
-function protect(req, res, next) {
+async function protect(req, res, next) {
   const authHeader = req.headers.authorization || '';
 
   if (!authHeader.startsWith('Bearer ')) {
@@ -10,6 +11,12 @@ function protect(req, res, next) {
   const token = authHeader.split(' ')[1];
 
   try {
+    // Stateful token revocation check against database blacklist
+    const isBlacklisted = await TokenBlacklist.findOne({ token });
+    if (isBlacklisted) {
+      return res.status(401).json({ success: false, message: 'Not authorized. Token has been revoked.' });
+    }
+
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
     req.user = decoded;
     return next();
