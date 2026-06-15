@@ -652,16 +652,32 @@ Authorization: Bearer <token>
 
 ## 🚀 Deployment
 
-### Backend Deployment (Render / Railway)
+### Backend Deployment (Render)
+
+This repo now includes a root-level `render.yaml` Blueprint that deploys the Express API from the `backend` folder.
 
 ```bash
-# Set environment variables on your deployment platform:
-PORT=5000
+# Render web service settings
+Root Directory: backend
+Build Command: npm ci
+Start Command: npm start
+Health Check Path: /api/v1/health
+```
+
+Set these environment variables in Render:
+
+```bash
 MONGO_URI=<your_mongodb_atlas_uri>
 JWT_SECRET=<your_secret>
 JWT_EXPIRES_IN=7d
 NODE_ENV=production
+DEBUG_HTTP_LOGS=false
 ```
+
+Notes:
+- `PORT` is injected automatically by Render, so you do not need to set it manually.
+- This backend requires a MongoDB connection string. Use MongoDB Atlas or another hosted MongoDB provider.
+- After deploy, your backend base URL will look like `https://<your-render-service>.onrender.com` and the frontend should use `https://<your-render-service>.onrender.com/api/v1`.
 
 **Backend Live URL:** `<!-- LIVE_BACKEND_URL -->`
 
