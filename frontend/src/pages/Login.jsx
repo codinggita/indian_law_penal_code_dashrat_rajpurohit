@@ -235,12 +235,12 @@ const Login = () => {
             />
 
             <div className="flex justify-end items-center pt-0">
-              <a
+              <Link
+                to="/forgot-password"
                 className="font-label text-sm font-bold uppercase text-primary hover:text-ink transition-colors underline decoration-2 underline-offset-4"
-                href="#"
               >
                 Reset Access?
-              </a>
+              </Link>
             </div>
 
             <button
