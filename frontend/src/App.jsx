@@ -5,7 +5,7 @@ import { HelmetProvider } from 'react-helmet-async';
 import { ThemeProvider as MuiThemeProvider, createTheme } from '@mui/material/styles';
 import store from './store';
 import { useAuth } from './hooks/useAuth';
-import { toggleSidebar } from './store/uiSlice';
+import { toggleSidebar, toggleTheme } from './store/uiSlice';
 import ErrorBoundary from './components/ErrorBoundary';
 import { Toaster } from 'react-hot-toast';
 
@@ -13,7 +13,10 @@ import { Toaster } from 'react-hot-toast';
 const Landing = React.lazy(() => import('./pages/Landing'));
 const Login = React.lazy(() => import('./pages/Login'));
 const Register = React.lazy(() => import('./pages/Register'));
+const ForgotPassword = React.lazy(() => import('./pages/ForgotPassword'));
+const ResetPassword = React.lazy(() => import('./pages/ResetPassword'));
 const Dashboard = React.lazy(() => import('./pages/Dashboard'));
+const SystemDashboard = React.lazy(() => import('./pages/SystemDashboard'));
 const LawsListing = React.lazy(() => import('./pages/LawsListing'));
 const UsersManagement = React.lazy(() => import('./pages/UsersManagement'));
 const Profile = React.lazy(() => import('./pages/Profile'));
@@ -80,7 +83,7 @@ const ProtectedRoute = ({ children }) => {
 // Layout Wrapper with responsive Sidebar and Navbar
 const AppLayout = ({ children }) => {
   const { user, logout, isAdmin } = useAuth();
-  const { sidebarOpen } = useSelector((state) => state.ui);
+  const { sidebarOpen, theme } = useSelector((state) => state.ui);
   const dispatch = useDispatch();
   const location = useLocation();
 
@@ -96,6 +99,7 @@ const AppLayout = ({ children }) => {
 
   if (isAdmin) {
     links.push({ label: 'User Controls', path: '/users', icon: 'shield_person' });
+    links.push({ label: 'System Health', path: '/system-dashboard', icon: 'health_and_safety' });
   }
 
   return (
@@ -195,6 +199,15 @@ const AppLayout = ({ children }) => {
           </div>
           <div className="flex items-center gap-4">
             <button
+              onClick={() => dispatch(toggleTheme())}
+              className="p-2 border-2 border-black bg-[#EAE7DC] dark:bg-black text-black dark:text-white shadow-brutal-sm hover:bg-[#D90429] hover:text-white active:translate-x-[2px] active:translate-y-[2px] active:shadow-none flex items-center justify-center transition-colors"
+              title="Toggle Dark Mode"
+            >
+              <span className="material-symbols-outlined text-xl">
+                {theme === 'dark' ? 'light_mode' : 'dark_mode'}
+              </span>
+            </button>
+            <button
               onClick={logout}
               className="hidden sm:flex px-3 py-1 bg-[#D90429] text-white border-2 border-black font-headline font-bold text-xs tracking-wider uppercase shadow-brutal-sm hover:-translate-x-[1px] hover:-translate-y-[1px] active:translate-x-[1px] active:translate-y-[1px] active:shadow-none"
             >
@@ -232,6 +245,8 @@ const AppContent = () => {
         <Route path="/" element={<Landing />} />
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
+        <Route path="/forgot-password" element={<ForgotPassword />} />
+        <Route path="/reset-password" element={<ResetPassword />} />
 
         {/* Protected Pages */}
         <Route
@@ -310,6 +325,16 @@ const AppContent = () => {
             <ProtectedRoute>
               <AppLayout>
                 <UsersManagement />
+              </AppLayout>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/system-dashboard"
+          element={
+            <ProtectedRoute>
+              <AppLayout>
+                <SystemDashboard />
               </AppLayout>
             </ProtectedRoute>
           }
