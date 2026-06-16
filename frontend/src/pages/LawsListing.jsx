@@ -119,6 +119,17 @@ const LawsListing = () => {
     }
   };
 
+  const handleToggleArchive = async (law) => {
+    try {
+      const endpoint = law.isArchived ? `/laws/${law._id}/restore` : `/laws/${law._id}/archive`;
+      await API.patch(endpoint);
+      toast.success(`Section ${law.sectionNumber} successfully ${law.isArchived ? 'restored' : 'archived'}.`);
+      fetchLaws(1, false);
+    } catch (err) {
+      toast.error('Failed to update archive status.');
+    }
+  };
+
   // Formik validation for Create / Edit law
   const formik = useFormik({
     initialValues: {
@@ -380,22 +391,30 @@ const LawsListing = () => {
                     </div>
                     {/* Admin CRUD actions block */}
                     {isAdmin && (
-                      <div className="flex border-t-2 border-black z-20 relative font-mono text-xs">
-                        <button
-                          onClick={() => {
-                            setEditingLaw(law);
-                            setCrudOpen(true);
-                          }}
-                          className="flex-1 py-2 bg-yellow-300 hover:bg-black hover:text-white transition-colors border-r-2 border-black text-center font-bold text-black"
-                        >
-                          EDIT DOSSIER
-                        </button>
-                        <button
-                          onClick={() => handleDeleteLaw(law)}
-                          className="flex-1 py-2 bg-jurist-primary text-white hover:bg-black transition-colors text-center font-bold"
-                        >
-                          PURGE RECORD
-                        </button>
+                      <div className="flex flex-col border-t-2 border-black z-20 relative font-mono text-xs">
+                        <div className="flex border-b-2 border-black">
+                          <button
+                            onClick={() => {
+                              setEditingLaw(law);
+                              setCrudOpen(true);
+                            }}
+                            className="flex-1 py-2 bg-yellow-300 hover:bg-black hover:text-white transition-colors border-r-2 border-black text-center font-bold text-black"
+                          >
+                            EDIT DOSSIER
+                          </button>
+                          <button
+                            onClick={() => handleToggleArchive(law)}
+                            className={`flex-1 py-2 hover:bg-black hover:text-white transition-colors border-r-2 border-black text-center font-bold text-black ${law.isArchived ? 'bg-green-400' : 'bg-gray-300'}`}
+                          >
+                            {law.isArchived ? 'RESTORE RECORD' : 'ARCHIVE RECORD'}
+                          </button>
+                          <button
+                            onClick={() => handleDeleteLaw(law)}
+                            className="flex-1 py-2 bg-jurist-primary text-white hover:bg-black transition-colors text-center font-bold"
+                          >
+                            PURGE
+                          </button>
+                        </div>
                       </div>
                     )}
                     <button
