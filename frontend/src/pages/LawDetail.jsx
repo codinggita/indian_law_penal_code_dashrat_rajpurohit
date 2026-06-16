@@ -39,6 +39,17 @@ const LawDetail = () => {
     fetchLawDetails();
   }, [id, navigate]);
 
+  const handleToggleArchive = async () => {
+    try {
+      const endpoint = law.isArchived ? `/laws/${law._id}/restore` : `/laws/${law._id}/archive`;
+      await API.patch(endpoint);
+      toast.success(`Section ${law.sectionNumber} successfully ${law.isArchived ? 'restored' : 'archived'}.`);
+      setLaw({ ...law, isArchived: !law.isArchived });
+    } catch (err) {
+      toast.error('Failed to update archive status.');
+    }
+  };
+
   if (loading) {
     return (
       <div className="flex-grow flex flex-col p-8 lg:p-12 justify-center items-center font-mono text-xs uppercase bg-jurist-bg">
@@ -82,13 +93,22 @@ const LawDetail = () => {
         
         <div className="flex gap-2">
           {isAdmin && (
-            <button
-              onClick={() => toast.error('Editing mode requires administrative authentication check.')}
-              className="brutal-border bg-[#000000] text-white px-4 py-2 font-display text-lg uppercase tracking-wider shadow-brutal hover:bg-jurist-primary active:translate-x-[2px] active:translate-y-[2px] active:shadow-none flex items-center gap-2"
-            >
-              <span className="material-symbols-outlined text-base">edit</span>
-              EDIT STATUTE
-            </button>
+            <>
+              <button
+                onClick={() => toast.error('Editing mode requires administrative authentication check.')}
+                className="brutal-border bg-[#000000] text-white px-4 py-2 font-display text-lg uppercase tracking-wider shadow-brutal hover:bg-jurist-primary active:translate-x-[2px] active:translate-y-[2px] active:shadow-none flex items-center gap-2"
+              >
+                <span className="material-symbols-outlined text-base">edit</span>
+                EDIT STATUTE
+              </button>
+              <button
+                onClick={handleToggleArchive}
+                className={`brutal-border text-black px-4 py-2 font-display text-lg uppercase tracking-wider shadow-brutal active:translate-x-[2px] active:translate-y-[2px] active:shadow-none flex items-center gap-2 ${law.isArchived ? 'bg-green-400 hover:bg-green-500' : 'bg-gray-300 hover:bg-gray-400'}`}
+              >
+                <span className="material-symbols-outlined text-base">{law.isArchived ? 'unarchive' : 'archive'}</span>
+                {law.isArchived ? 'RESTORE STATUTE' : 'ARCHIVE STATUTE'}
+              </button>
+            </>
           )}
         </div>
       </div>
@@ -179,18 +199,23 @@ const LawDetail = () => {
               📋 LEGISLATIVE HISTORICAL LOGS
             </h3>
             <div className="space-y-4 font-mono text-[10px] leading-relaxed text-gray-300">
-              <div className="border-l-2 border-jurist-primary pl-3">
-                <strong className="text-white block">2026-01-12 // INTERNAL REVISION</strong>
-                Dossier classifications synchronized with digital penal index v4.0.
-              </div>
-              <div className="border-l-2 border-jurist-primary pl-3">
-                <strong className="text-white block">2024-08-19 // STATE AMENDMENT</strong>
-                State amendments integrated to include updated triable jurisdiction rulings.
-              </div>
-              <div className="border-l-2 border-jurist-primary pl-3">
-                <strong className="text-white block">2023-04-11 // SYSTEM REGISTERED</strong>
-                Section record imported from standard legislative source datasets.
-              </div>
+              {law.updateHistory && law.updateHistory.length > 0 ? (
+                law.updateHistory.map((history, idx) => (
+                  <div key={idx} className="border-l-2 border-jurist-primary pl-3">
+                    <strong className="text-white block">
+                      {new Date(history.updatedAt).toLocaleDateString('en-CA')} // {history.updatedBy || 'SYSTEM'}
+                    </strong>
+                    {history.changes}
+                  </div>
+                ))
+              ) : (
+                <div className="border-l-2 border-jurist-primary pl-3">
+                  <strong className="text-white block">
+                    {new Date(law.createdAt).toLocaleDateString('en-CA')} // SYSTEM REGISTERED
+                  </strong>
+                  Section record imported from standard legislative source datasets.
+                </div>
+              )}
             </div>
           </div>
         </div>
